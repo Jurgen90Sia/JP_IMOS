@@ -31,7 +31,27 @@ module JPImosPro
         end
         policy=ProjectCore.validated_policy(numeric_policy,budget)
         snapshot=zone_snapshot(authored,policy,budget)
-        article=snapshot['articles'].find { |a| a['article_instance_id']==normalized['article_instance_id'] }
+        project_sha=Digest::SHA256.hexdigest(ProjectCore::Codec.encode(authored,budget))
+        preview_from_validated(document:authored,request:normalized,zone_snapshot:snapshot,project_sha:project_sha,
+          policy:policy,budget:budget,contexts:contexts)
+      end
+      result[:metadata]={schema:'jpimos.carcass-preview/1',profile_version:'jp-carcass-preview-v1',rule_version:Request::PRINCIPLE}
+      result[:metadata]=result[:metadata].merge(policy) if policy
+      result
+    end
+    # Trusted core path: state validation and zone resolution already succeeded.
+    # No public nested call, callback or fresh request counter is created.
+    def preview_from_validated(document:,request:,zone_snapshot:,project_sha:,policy:,budget:,contexts: nil)
+        unless zone_snapshot['project_id']==document['project_id'] && zone_snapshot['source_revision']==document['revision'] &&
+            zone_snapshot['policy_id']==policy[:policy_id] && zone_snapshot['backend_id']==policy[:backend_id] &&
+            project_sha.instance_of?(String) && /\A[0-9a-f]{64}\z/.match?(project_sha)
+          raise ProjectCore::Fault.new('E_INPUT_CONTRACT','/document')
+        end
+        contexts ||= Request::ROLES.each_with_object({}) do |role,h|
+          h[role]=Materials::Context.resolve(characteristic:request['panels'][role],budget:budget,pointer:'/request/panels/'+role)
+        end
+        article=zone_snapshot['articles'].find { |a| a['article_instance_id']==request['article_instance_id'] }
+        raise ProjectCore::Fault.new('E_REFERENCE_MISSING','/request/article_instance_id') unless article
         rule=CarcassRule.build(article:article,contexts:contexts,budget:budget)
         panels=rule['recipes'].map do |recipe|
           begin
@@ -42,19 +62,15 @@ module JPImosPro
           recipe.merge('geometry'=>geometry)
         end
         audit(panels,rule['reference_envelope'],budget)
-        context={'project_id'=>authored['project_id'],'project_revision'=>authored['revision'],
-          'project_document_sha256'=>Digest::SHA256.hexdigest(ProjectCore::Codec.encode(authored,budget)),
-          'article_instance_id'=>normalized['article_instance_id'],
-          'request_sha256'=>Digest::SHA256.hexdigest(ProjectCore::Codec.encode(normalized,budget)),
+        context={'project_id'=>document['project_id'],'project_revision'=>document['revision'],
+          'project_document_sha256'=>project_sha,
+          'article_instance_id'=>request['article_instance_id'],
+          'request_sha256'=>Digest::SHA256.hexdigest(ProjectCore::Codec.encode(request,budget)),
           'rule_version'=>Request::PRINCIPLE.dup}
-        preview={'schema'=>'jpimos.carcass-preview/1','source_context'=>context,'construction_request'=>normalized,
+        preview={'schema'=>'jpimos.carcass-preview/1','source_context'=>context,'construction_request'=>request,
           'article_origin'=>article['origin'],'reference_envelope'=>rule['reference_envelope'],
           'reference_opening'=>rule['reference_opening'],'panels'=>panels,'diagnostics'=>[]}
         ProjectCore::Document.new(budget).deep_freeze(preview)
-      end
-      result[:metadata]={schema:'jpimos.carcass-preview/1',profile_version:'jp-carcass-preview-v1',rule_version:Request::PRINCIPLE}
-      result[:metadata]=result[:metadata].merge(policy) if policy
-      result
     end
     def audit(panels,envelope,budget)
       extents=envelope['extents'].map { |v| Zones::EngineBridge.rational(v) }

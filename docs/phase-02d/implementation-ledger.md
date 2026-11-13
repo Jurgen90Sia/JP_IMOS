@@ -1,0 +1,10 @@
+# SDD ledger — plan: docs/phase-01/25-carcass-design-state-implementation-plan.md
+User continues autonomous work without approval questions. Basee99a97e7c64452c3fa5ad1809cb8e475fed2e6b5, branch feat/carcass-design-state; work/design staging.
+Ruling: explicit profile-specific owning envelope instead of adding unknown fields to core schema or accepting a second live request store. All request changes must increment the project revision.
+Preflight: bounded state copy -> trusted owned project/request validation -> shared revision guards/state comparison -> one zone snapshot/project hash -> reused preview builder -> immutable prepared state. No nested public calls/reset budgets.
+Tasks1 state codec;2 complete snapshot/preparation;3 qualification/review/integration.
+Task1 complete: missing design entry observed failing;77 tests/1298 assertions green on Ruby2.7/3.2. Closed owning state, canonical duplicate-aware codec, exact coverage and trusted-owned helper extraction preserve all74 baseline tests.
+Task2 complete: absent Design.prepare_revision failed first;81 tests/1345 assertions green on both runtimes. Request-only edits increment shared project revision; zone snapshot/previews match. Core revision guards and construction common path extracted, public74-test baseline preserved; zones/project digest built once per design snapshot.
+Task3 complete:87 tests/1397 assertions green on real Ruby2.7.8/3.2.9. Read-only cross-version fixture comparison confirmed identical state/project/request SHA256 values. Existing74 baseline tests preserved.
+Fresh-context static review found no high/medium issue; low current-project budget pointer fixed with red/green regression. Additional regressions fixed lexical request diagnostics at validation/runtime and explicit incompatible derived-schema refusal. Authored array output order retained.
+Readiness disposition: host/export BLOCKED by unverified catalog refs, missing accepted general PartSpec/material snapshot and undefined native dictionary/apply/undo contract. No host execution/loader/RBZ/export implementation started. Only qualified pure authoring/preparation integrated.

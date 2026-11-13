@@ -8,6 +8,10 @@ module JPImosPro
       module_function
       def validate(raw,budget)
         value=Materials::Context.copy(raw,budget,'/request')
+        validate_owned(value,budget)
+      end
+      # Used only for an owned subtree of a bounded design-state copy.
+      def validate_owned(value,budget)
         Materials::Context.keys(value,%w[schema article_instance_id principle panels],'/request')
         unless value['schema']==SCHEMA
           raise ProjectCore::Fault.new('E_SCHEMA_UNSUPPORTED','/request/schema')

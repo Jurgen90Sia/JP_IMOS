@@ -7,6 +7,9 @@ module JPImosPro
       def self.validate(raw,budget)
         new(budget).validate(raw)
       end
+      def self.validate_owned(raw,budget)
+        new(budget).validate_owned(raw)
+      end
       def initialize(budget)
         @budget = budget
       end
@@ -14,7 +17,10 @@ module JPImosPro
         raise Fault.new(code,path)
       end
       def validate(raw)
-        data = copy(raw)
+        validate_owned(copy(raw))
+      end
+      # Trusted callers have already completed the bounded plain-data copy.
+      def validate_owned(data)
         fail_at('') unless data.instance_of?(Hash)
         fail_at('/schema','E_SCHEMA_UNSUPPORTED') if data.key?('schema') && data['schema'] != SCHEMA
         result = record(data,{

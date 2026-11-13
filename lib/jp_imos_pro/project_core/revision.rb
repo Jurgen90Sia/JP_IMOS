@@ -10,6 +10,9 @@ module JPImosPro
       end
       def current(document,expected,budget)
         result=validate(document,'/current',budget)
+        check_current(result,expected)
+      end
+      def check_current(result,expected)
         unless expected.instance_of?(Integer) && expected.between?(0,Document::SAFE_INTEGER)
           raise Fault.new('E_INPUT_CONTRACT','/expected_revision')
         end
@@ -23,6 +26,11 @@ module JPImosPro
       end
       def replacement(current,document,budget)
         result=validate(document,'/replacement',budget)
+        check_replacement(current,result,budget)
+        raise Fault.new('E_NO_CHANGE','/replacement') if semantic_equal?(current,result,budget)
+        result
+      end
+      def check_replacement(current,result,budget)
         %w[project_id revision].each do |key|
           raise Fault.new('E_REVISION_CONFLICT','/replacement/'+key) unless result[key]==current[key]
         end
@@ -38,7 +46,6 @@ module JPImosPro
             raise Fault.new('E_DEFINITION_DUPLICATE',"/replacement/definitions/#{i}",nil,{id:key[0],version:key[1]})
           end
         end
-        raise Fault.new('E_NO_CHANGE','/replacement') if semantic_equal?(current,result,budget)
         result
       end
       # Called only after both trees have been copied/closed-schema validated.
