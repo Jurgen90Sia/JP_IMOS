@@ -47,3 +47,7 @@ The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit fini
 ## Revision-bound construction authoring
 
 [Carcass Design State](docs/phase-02d/README.md) owns the project component and construction requests under one revision, with atomic complete prepared snapshots. See [qualification](docs/phase-02d/validation.md). Production host/export integration remains [blocked by explicit material, PartSpec and persistence contracts](docs/phase-02d/host-readiness.md); this data module does not bypass them.
+
+## Local physical part profile
+
+[Rectangular Physical Part](docs/phase-02f/rectangular-physical-part.md) now prepares exact substrate, finished-envelope and ordered surface-layer solids from an explicit local intent. Grain and all four unbanded edges are required. Nominal purchase thickness is separate from actual geometry. This local builder returns `prepared_unbound_part`; it is not yet connected to revision-owned project authoring, verified catalog bindings or production host acceptance. Existing material-bound snapshots retain their established finished-preview contract.
