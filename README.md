@@ -35,3 +35,5 @@ The project-core codec/validation unit is authorized; numeric zone resolution an
 ## Project-core and zone design
 
 [Phase 2B project-core and hierarchical-zone design](docs/phase-01/18-project-zones-spec.md) specifies lossless exact values, pinned definitions, positive partitions, explicit reservation slots, independent layers and prepared revisions. The user approved this design and its first-unit plan. The implemented subset is documented in [Project-Core API](docs/phase-02b/README.md), with [qualification](docs/phase-02b/validation.md). Run the combined suite with `ruby test/all_test.rb`. Zone arithmetic and prepared revisions remain deferred.
+
+The next arithmetic slice is described in the [exact zone-resolver implementation plan](docs/phase-01/20-zone-resolver-implementation-plan.md). It reuses the merged project-core contracts; prepared revisions and SketchUp geometry remain separate work. This plan is awaiting execution review.
