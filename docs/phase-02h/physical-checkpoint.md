@@ -22,7 +22,7 @@ Task1 files: create `lib/jp_imos_pro/design/physical_checkpoint.rb`, `test/desig
 
 - [x] RED: round-trip rebuild, canonical ordering, checksum rejection, repaired-checksum false bindings, changed backend, closed schema/duplicate keys, caller ownership and resource failures.
 - [x] Implement bounded source-only encoding/rebuilding decode using owned helpers, no nested public boundary or file operation.
-- [ ] GREEN: full suites on Ruby2.7.8/3.2.9, independent review, publish/integrate under standing authorization.
+- [x] GREEN: full suites on Ruby2.7.8/3.2.9, independent review and published PR #12 under standing integration authorization.
 
 Review focus: treating checksum as source authority; accepting a stale snapshot hash after repaired checksum; silently rebinding another numeric backend; freezing caller strings/state; resetting work during rebuild. Each has a focused test. Native persistence/transactions remain NOT RUN for this codec.
 
@@ -33,3 +33,7 @@ Base main `e90138a0404f604b881b80de3952b0c349f4d9b8`, clean;124 baseline tests /
 Task1 RED:8 missing-entry-point errors before implementation. Focused GREEN:8 tests /87 assertions. Full real Ruby2.7.8 and3.2.9 suites each passed132 tests /1,839 assertions with no failures/errors/skips, preserving all124 baseline tests. Repairing the outer checksum after changing any individual verification binding still fails against freshly rebuilt data. Same-policy encode/decode/re-encode is byte-stable; a different valid backend is rejected. Aggregate decode under work48,000 fails atomically while default-budget retry succeeds.
 
 No scope or schema ruling was required. This is a source persistence codec only. The existing local-builder native proof remains separately scoped and does not qualify this codec or native host persistence. No source manuals, binary assets, runtime dependency, file writer, model dictionary or loader is added.
+
+Final review: independent read-only review of `e90138a..1ecc216` approved the documented pure codec scope with no actionable findings. Reviewer independently reran the full Ruby2.7.8 and3.2.9 suites:132 tests /1,839 assertions each, all passing. No fixes or deferred minors were requested.
+
+Final Ruling: native host persistence/model dictionaries, transaction/CAS acceptance, undo/reopen recovery, backend migration, manufacturer authority and cryptographic authenticity were not judged by this review. The codec claims consistent source reconstruction only; these remain separate dependencies rather than implied guarantees. Checksums are not signatures or proof of acceptance.
