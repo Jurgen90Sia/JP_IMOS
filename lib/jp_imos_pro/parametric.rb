@@ -71,6 +71,76 @@ module JPImosPro
       end
     end
 
+    def references(tree, budget, found = [])
+      budget.tick
+      kind, args = tree
+      if kind == :symbol
+        name = args[0].sub(/\A\$/, '')
+        found << name unless name == 'pi'
+      elsif kind == :call
+        args[1].each { |child| references(child, budget, found) }
+      else
+        args.each { |child| references(child, budget, found) if child.is_a?(Array) }
+      end
+      found.uniq.sort
+    end
+
+    def evaluate_definitions(definitions:, inputs:, numeric_policy:, limits: {})
+      guard(CORE, numeric_policy, limits) do |budget|
+        env = bindings(inputs, budget)
+        raise Fault.new('E_INPUT_CONTRACT', nil, 'definitions') unless definitions.is_a?(Hash)
+        raise Fault.new('E_RESOURCE_LIMIT') if definitions.size > budget.limit(:definitions)
+        trees, types = {}, {}
+        definitions.each do |name, definition|
+          budget.tick
+          validate_name(name, 'definitions')
+          raise Fault.new('E_DUPLICATE_SYMBOL', nil, "definitions.#{name}", [name]) if env.key?(name)
+          unless definition.is_a?(Hash) && definition.keys.sort == [:expected_type, :source] && %w[Scalar Length Boolean].include?(definition[:expected_type])
+            raise Fault.new('E_INPUT_CONTRACT', nil, "definitions.#{name}")
+          end
+          trees[name] = Parser.new(definition[:source], budget).parse
+          types[name] = definition[:expected_type]
+        end
+        graph = trees.each_with_object({}) do |(name, tree), h|
+          h[name] = references(tree, budget)
+          unknown = h[name] - trees.keys - env.keys
+          raise Fault.new('E_UNKNOWN_SYMBOL', tree[2], nil, unknown) unless unknown.empty?
+          h[name] &= trees.keys
+        end
+        # Kahn's algorithm avoids recursion on a 1000-definition chain.
+        order = []
+        pending = graph.transform_values(&:dup)
+        until pending.empty?
+          budget.tick
+          ready = pending.select { |_name, deps| deps.empty? }.keys.sort
+          if ready.empty?
+            start = pending.keys.sort.first
+            path, seen, current = [], {}, start
+            until seen.key?(current)
+              budget.tick
+              seen[current] = path.size
+              path << current
+              current = pending.fetch(current).sort.first
+            end
+            cycle = path[seen[current]..-1] + [current]
+            raise Fault.new('E_DEPENDENCY_CYCLE', nil, nil, cycle, {cycle: cycle})
+          end
+          # One at a time provides deterministic lexical priority after each removal.
+          name = ready.first
+          order << name
+          pending.delete(name)
+          pending.each_value { |deps| deps.delete(name) }
+        end
+        order.each do |name|
+          evaluator = Evaluator.new(env, budget)
+          raise Fault.new('E_UNIT_MISMATCH', trees[name][2], nil, [name]) unless evaluator.type(trees[name]) == types[name]
+          env[name] = evaluator.value(trees[name])
+        end
+        {symbols: env.transform_values(&:serialize), order: order,
+          dependencies: graph}
+      end
+    end
+
     def validate_name(name, path)
       raise Fault.new('E_INPUT_CONTRACT', nil, path) unless name.is_a?(String) && /\A[A-Za-z_][A-Za-z0-9_]*\z/.match?(name)
       raise Fault.new('E_RESERVED_SYMBOL', nil, path, [name]) if %w[pi true false X Y].include?(name)

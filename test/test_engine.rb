@@ -56,4 +56,21 @@ class EngineTest < Minitest::Test
     error('E_SYNTAX', expression('1<2<3'))
     error('E_UNSUPPORTED_GRAMMAR', expression('2**3'))
   end
+  def definitions(defs, inputs = {})
+    P.evaluate_definitions(definitions: defs, inputs: inputs, numeric_policy: POLICY)
+  end
+  def test_definitions_have_atomic_deterministic_dependency_resolution
+    defs = {'b'=>{source: 'a*2', expected_type: 'Length'}, 'a'=>{source: 'T+1mm', expected_type: 'Length'}}
+    result = definitions(defs, {'T'=>quantity(18,'Length')})
+    assert result[:ok], result.inspect
+    assert_equal ['a','b'], result[:value][:order]
+    assert_equal '38', result[:value][:symbols]['b'][:numeric][:numerator]
+    error('E_DEPENDENCY_CYCLE', definitions({'a'=>{source:'b',expected_type:'Scalar'},'b'=>{source:'a',expected_type:'Scalar'}}))
+    error('E_DEPENDENCY_CYCLE', definitions({'a'=>{source:'if(true,1,a)',expected_type:'Scalar'}}))
+    error('E_UNKNOWN_SYMBOL', definitions({'a'=>{source:'if(true,1,missing)',expected_type:'Scalar'}}))
+    error('E_DUPLICATE_SYMBOL', definitions({'a'=>{source:'1',expected_type:'Scalar'}}, {'a'=>quantity(0)}))
+    error('E_RESERVED_SYMBOL', expression('pi', {'pi'=>quantity(0)}))
+    assert_equal 0, number(expression('$a', {'a'=>quantity(0)}))
+    error('E_UNKNOWN_SYMBOL', expression('$a'))
+  end
 end
