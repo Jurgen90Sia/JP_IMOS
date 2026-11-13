@@ -33,4 +33,8 @@ class CoreCodecTest < Minitest::Test
     fault('E_INPUT_CONTRACT','{}',nil,{'json_bytes'=>100})
     fault('E_RESOURCE_LIMIT','[1,2,3]',nil,{work:2})
   end
+  def test_project_numeric_tokens_are_bounded_before_integer_conversion
+    fault('E_INPUT_CONTRACT','{"revision":'+'9'*5000+'}')
+    assert_equal({'label'=>'9'*5000},parse('{"label":"'+'9'*5000+'"}'))
+  end
 end

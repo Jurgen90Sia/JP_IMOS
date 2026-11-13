@@ -26,6 +26,7 @@ module JPImosPro
           raise Fault.new('E_INPUT_CONTRACT')
         end
         budget.cap(source.bytesize, :json_bytes, '')
+        numeric_token_bound(source)
         raw = JSON.parse(source, object_class: PairObject, max_nesting: budget.limit(:json_depth),
           allow_nan: false, create_additions: false)
         holder, duplicates = [], []
@@ -35,6 +36,7 @@ module JPImosPro
           budget.tick(path)
           case value
           when PairObject
+            budget.tick(path,value.pairs.size)
             output, seen = {}, {}
             target[key] = output
             value.pairs.reverse_each do |name, child|
@@ -44,6 +46,7 @@ module JPImosPro
               stack << [child, output, name, p]
             end
           when Array
+            budget.tick(path,value.size)
             output = Array.new(value.size)
             target[key] = output
             (value.size-1).downto(0) { |i| stack << [value[i],output,i,ProjectCore.pointer(path,i)] }
@@ -57,6 +60,30 @@ module JPImosPro
         raise Fault.new('E_RESOURCE_LIMIT')
       rescue JSON::ParserError, EncodingError
         raise Fault.new('E_INPUT_CONTRACT')
+      end
+      # All unquoted project numbers are bounded safe-integer fields. Ratio
+      # numerators are quoted strings and must not be parsed as giant Integers.
+      def numeric_token_bound(source)
+        quoted, escaped, digits = false, false, 0
+        source.each_char do |char|
+          if quoted
+            if escaped
+              escaped=false
+            elsif char=='\\'
+              escaped=true
+            elsif char=='"'
+              quoted=false
+            end
+          elsif char=='"'
+            quoted=true
+            digits=0
+          elsif char >= '0' && char <= '9'
+            digits += 1
+            raise Fault.new('E_INPUT_CONTRACT') if digits > 16
+          else
+            digits=0
+          end
+        end
       end
     end
   end

@@ -82,4 +82,36 @@ class CoreDocumentTest < Minitest::Test
     doc['articles'][0]['origin'] = [length(0)]
     error('E_INPUT_CONTRACT',encode(doc),'/articles/0/origin')
   end
+  def test_host_callbacks_and_aggregate_bytes_are_rejected_before_serialization
+    bomb=Class.new do
+      def ==(_other)
+        raise 'host comparison callback must not run'
+      end
+      def to_json(*_args)
+        raise 'host serializer callback must not run'
+      end
+    end.new
+    doc=valid_document
+    doc['revision']=bomb
+    error('E_INPUT_CONTRACT',encode(doc))
+    doc=valid_document
+    doc['definitions'][0]['label']='a'*300
+    doc['definitions'][0]['source_refs']=[{'requirement_id'=>'b'*300,'classification'=>'PROPOSED','pdf'=>nil,'page'=>nil,'conflict_id'=>nil}]
+    error('E_RESOURCE_LIMIT',encode(doc,{json_bytes:500}))
+  end
+  def test_first_field_error_uses_lexical_json_pointer_even_for_array_indexes
+    doc=valid_document
+    doc['articles']=Array.new(12) { |i| Marshal.load(Marshal.dump(doc['articles'][0])).merge('id'=>uuid(100+i)) }
+    doc['articles'][2]['origin']='bad'
+    doc['articles'][10]['origin']='bad'
+    error('E_INPUT_CONTRACT',encode(doc),'/articles/10/origin')
+    doc=valid_document
+    doc['zzz']=1
+    doc['articles']='bad'
+    error('E_INPUT_CONTRACT',encode(doc),'/articles')
+    doc=valid_document
+    doc['/']=0
+    doc['a']=0
+    error('E_INPUT_CONTRACT',encode(doc),'/a')
+  end
 end

@@ -5,10 +5,12 @@ module JPImosPro
       RESERVED = %w[pi true false X Y abs min max if sin cos tan asin acos ZONE_U ZONE_V ZONE_W].freeze
       module_function
       def validate_all(document,budget,index)
-        document['definitions'].each_with_index do |definition,i|
+        (0...document['definitions'].size).sort_by { |i| i.to_s }.each do |i|
+          definition=document['definitions'][i]
           validate_definition(definition,"/definitions/#{i}",budget)
         end
-        document['articles'].each_with_index do |instance,i|
+        (0...document['articles'].size).sort_by { |i| i.to_s }.each do |i|
+          instance=document['articles'][i]
           budget.tick("/articles/#{i}")
           ref = instance['definition_ref']
           definition = index.fetch([ref['id'],ref['version']])
@@ -23,7 +25,8 @@ module JPImosPro
       end
       def validate_definition(definition,pointer,budget)
         names = {}
-        definition['parameters'].each_with_index do |parameter,i|
+        (0...definition['parameters'].size).sort_by { |i| i.to_s }.each do |i|
+          parameter=definition['parameters'][i]
           path = "#{pointer}/parameters/#{i}"
           budget.tick(path)
           name = parameter['name']

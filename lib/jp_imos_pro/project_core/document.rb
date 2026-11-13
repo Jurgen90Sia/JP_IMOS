@@ -38,25 +38,29 @@ module JPImosPro
           if value.instance_of?(Hash) || value.instance_of?(Array)
             fail_at(path) if active.key?(value.object_id)
             @budget.cap(depth+1,:json_depth,path)
+            @budget.tick(path,value.size)
             active[value.object_id] = true
             stack << [:leave,value]
             output = value.instance_of?(Hash) ? {} : Array.new(value.size)
             target[key] = output
             if value.instance_of?(Hash)
-              value.each_key { |name| fail_at(path) unless text?(name) }
-              value.keys.reverse_each { |name| stack << [:enter,value[name],output,name.dup,ProjectCore.pointer(path,name),depth+1] }
+              value.each_key do |name|
+                fail_at(path) unless text?(name)
+                @budget.text_bytes(name.bytesize,path)
+              end
+              value.keys.sort_by { |name| ProjectCore.pointer(path,name) }.reverse_each { |name| stack << [:enter,value[name],output,name.dup,ProjectCore.pointer(path,name),depth+1] }
             else
-              (value.size-1).downto(0) { |i| stack << [:enter,value[i],output,i,ProjectCore.pointer(path,i),depth+1] }
+              (0...value.size).sort_by { |i| i.to_s }.reverse_each { |i| stack << [:enter,value[i],output,i,ProjectCore.pointer(path,i),depth+1] }
             end
           elsif value.instance_of?(String)
             fail_at(path) unless text?(value)
             @budget.cap(value.bytesize,:json_bytes,path)
+            @budget.text_bytes(value.bytesize,path)
             target[key] = value.dup
           elsif value.instance_of?(Integer)
             fail_at(path) if value.abs > SAFE_INTEGER
             target[key] = value
-          elsif value.nil? || value == true || value == false
-            fail_at(path) unless value.nil? || value.instance_of?(TrueClass) || value.instance_of?(FalseClass)
+          elsif value.instance_of?(NilClass) || value.instance_of?(TrueClass) || value.instance_of?(FalseClass)
             target[key] = value
           else
             fail_at(path)
@@ -69,14 +73,22 @@ module JPImosPro
       end
       def record(value, fields, path)
         fail_at(path) unless value.instance_of?(Hash)
+        errors=[]
         unknown = value.keys - fields.keys
-        fail_at(ProjectCore.pointer(path,unknown.min)) unless unknown.empty?
+        unknown.each { |name| errors << Fault.new('E_INPUT_CONTRACT',ProjectCore.pointer(path,name)) }
         missing = fields.keys - value.keys
-        fail_at(ProjectCore.pointer(path,missing.min)) unless missing.empty?
+        missing.each { |name| errors << Fault.new('E_INPUT_CONTRACT',ProjectCore.pointer(path,name)) }
         validated = {}
         fields.keys.sort.each do |name|
-          validated[name] = check(value[name],fields[name],ProjectCore.pointer(path,name))
+          next unless value.key?(name)
+          begin
+            validated[name] = check(value[name],fields[name],ProjectCore.pointer(path,name))
+          rescue Fault => e
+            raise if e.code=='E_RESOURCE_LIMIT'
+            errors << e
+          end
         end
+        raise errors.min_by(&:json_pointer) unless errors.empty?
         fields.keys.each_with_object({}) { |name,h| h[name] = validated[name] }
       end
       def check(value, rule, path)
@@ -89,7 +101,9 @@ module JPImosPro
           elsif kind == :array
             fail_at(path) unless value.instance_of?(Array)
             @budget.cap(value.size,cap,path) if cap
-            return value.each_with_index.map { |child,i| check(child,arg,ProjectCore.pointer(path,i)) }
+            result=Array.new(value.size)
+            (0...value.size).sort_by { |i| i.to_s }.each { |i| result[i]=check(value[i],arg,ProjectCore.pointer(path,i)) }
+            return result
           end
         end
         case rule

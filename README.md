@@ -2,7 +2,7 @@
 
 Original parametric furniture construction research for desktop SketchUp 2021–2026, with Albanian/English user-facing language support and millimeters as canonical units.
 
-**Current implementation: Phase 2A pure parametric engine.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
+**Current implementation: Phase 2A parametric engine and Phase 2B project-core contract.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
 
 ## Scope and evidence
 
@@ -19,7 +19,7 @@ The original14 reports are frozen Phase 1B research records. Their historical st
 
 ## Next permitted technical scope
 
-Only the **Parametric Expression and Linear Division Engine** is implemented. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
+The **Parametric Expression and Linear Division Engine** and **Project-Core Contract** are implemented. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
 
 Drilling, CNC, CAM, nesting, toolpaths and machine postprocessors are excluded. No affiliation with proprietary imos software is implied.
 
@@ -29,9 +29,9 @@ Source PDFs, extracted text, rendered figures, credentials and generated artifac
 
 No project distribution license has been selected in this phase. MIT/BSD candidate terms do not license this repository automatically; GPL or unlicensed candidate code is not incorporated. See [license audit](docs/phase-01/06-license-audit.md).
 
-No broader Phase 2 module is authorized. The 14 historical Phase 1B reports are unchanged; their prior authorization/status statements remain dated research records.
+The project-core codec/validation unit is authorized; numeric zone resolution and host integration remain later work. The 14 historical Phase 1B reports are unchanged; their prior authorization/status statements remain dated research records.
 
 
-## Next design under review
+## Project-core and zone design
 
-[Phase 2B project-core and hierarchical-zone design](docs/phase-01/18-project-zones-spec.md) specifies lossless exact values, pinned definitions, positive partitions, explicit reservation slots, independent layers and prepared revisions. It is a proposed design; no new module is implemented by that document.
+[Phase 2B project-core and hierarchical-zone design](docs/phase-01/18-project-zones-spec.md) specifies lossless exact values, pinned definitions, positive partitions, explicit reservation slots, independent layers and prepared revisions. The user approved this design and its first-unit plan. The implemented subset is documented in [Project-Core API](docs/phase-02b/README.md), with [qualification](docs/phase-02b/validation.md). Run the combined suite with `ruby test/all_test.rb`. Zone arithmetic and prepared revisions remain deferred.

@@ -71,4 +71,13 @@ class CoreParametersTest < Minitest::Test
     doc['definitions'][0]['parameters'] << optional('a'.encode('UTF-16LE'))
     error('E_INPUT_CONTRACT',doc)
   end
+  def test_parameter_diagnostics_follow_lexical_pointer_order_across_definitions
+    doc=valid_document
+    base=doc['definitions'][0]
+    doc['definitions']=Array.new(12) { |i| Marshal.load(Marshal.dump(base)).merge('version'=>i+1) }
+    [2,10].each { |i| doc['definitions'][i]['parameters'] << optional('a','Angle',nil) }
+    r=encode(doc)
+    assert_equal 'E_TYPE_UNSUPPORTED',r[:diagnostics][0][:code]
+    assert_equal '/definitions/10/parameters/3/expected_type',r[:diagnostics][0][:json_pointer]
+  end
 end

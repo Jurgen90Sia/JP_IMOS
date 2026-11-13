@@ -12,7 +12,7 @@ module JPImosPro
             raise Fault.new('E_INPUT_CONTRACT', '/limits')
           end
         end
-        @limits, @work = DEFAULTS.merge(limits), 0
+        @limits, @work, @text_bytes = DEFAULTS.merge(limits), 0, 0
       end
       def limit(key)
         @limits.fetch(key)
@@ -23,6 +23,10 @@ module JPImosPro
       end
       def cap(size, key, pointer)
         raise Fault.new('E_RESOURCE_LIMIT', pointer) if size > limit(key)
+      end
+      def text_bytes(count, pointer)
+        @text_bytes += count
+        cap(@text_bytes,:json_bytes,pointer)
       end
     end
   end

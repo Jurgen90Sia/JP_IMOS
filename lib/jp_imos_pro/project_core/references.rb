@@ -84,10 +84,21 @@ module JPImosPro
         end
         reject_errors(errors)
         budget.cap(occurrences,:occurrences,'/articles')
-        graphs.each { |definition,path,zones,_slots| topology(definition,path,zones,budget) }
+        [:parents,:cycles,:reachability].each do |phase|
+          errors=[]
+          graphs.each do |definition,path,zones,_slots|
+            begin
+              topology(definition,path,zones,budget,phase)
+            rescue Fault => e
+              raise if e.code=='E_RESOURCE_LIMIT'
+              errors << e
+            end
+          end
+          reject_errors(errors)
+        end
         index
       end
-      def topology(definition,path,zones,budget)
+      def topology(definition,path,zones,budget,phase)
         parents=Hash.new { |h,key| h[key]=[] }
         zones.each_value do |zone,zp|
           zone['children'].each_with_index do |child,i|
@@ -95,8 +106,12 @@ module JPImosPro
             parents[child['zone_id']] << "#{zp}/children/#{i}/zone_id"
           end
         end
-        multiple=parents.values.select { |p| p.size>1 }.map { |p| Fault.new('E_ZONE_MULTIPLE_PARENTS',p.sort[1]) }
-        reject_errors(multiple)
+        if phase==:parents
+          multiple=parents.values.select { |p| p.size>1 }.map { |p| Fault.new('E_ZONE_MULTIPLE_PARENTS',p.sort[1]) }
+          reject_errors(multiple)
+          return
+        end
+        if phase==:cycles
         states={}
         zones.keys.sort.each do |start|
           next if states[start]==2
@@ -115,6 +130,8 @@ module JPImosPro
               zone['children'].reverse_each { |child| stack << [:enter,child['zone_id']] }
             end
           end
+        end
+        return
         end
         root=definition['root_zone_id']
         unless parents[root].empty?

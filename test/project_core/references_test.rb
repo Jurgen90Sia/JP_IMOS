@@ -117,4 +117,22 @@ class CoreReferencesTest < Minitest::Test
     error('E_RESOURCE_LIMIT',doc,{definitions:1})
     error('E_RESOURCE_LIMIT',valid_document,{work:2})
   end
+  def test_global_topology_passes_do_not_hide_cycles_behind_other_definition_orphans
+    doc=valid_document
+    doc['definitions'][0]['zones'] << leaf(99)
+    second=Marshal.load(Marshal.dump(valid_document['definitions'][0]))
+    second['id']=uuid(200)
+    partition(second['zones'][0],[3])
+    doc['definitions'] << second
+    error('E_ZONE_CYCLE',doc)
+    doc=valid_document
+    partition(doc['definitions'][0]['zones'][0],[3])
+    other=star(3)['definitions'][0]
+    other['id']=uuid(200)
+    other['zones'] << leaf(6)
+    partition(other['zones'][1],[6])
+    partition(other['zones'][2],[6])
+    doc['definitions'] << other
+    error('E_ZONE_MULTIPLE_PARENTS',doc)
+  end
 end
