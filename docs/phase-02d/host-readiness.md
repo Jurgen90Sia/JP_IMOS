@@ -14,6 +14,8 @@ Source persistence format update: [Physical Checkpoint](../phase-02h/physical-ch
 
 ## Historical dependency audit
 
+Native draft checkpoint update: [the controlled dictionary probe](../phase-02h/native-checkpoint-validation.md) passed source encode/decode, SKP save and actual switch-away/reopen on SketchUp21.0.339/Ruby2.7.1. Stored bytes and rebuilt revision8/four-part snapshot were identical; existing scratch geometry was preserved. This uses a probe-only dictionary and a separate draft source, not a production accepted mapping. Production namespace/CAS, atomic geometry+source replacement, undo/redo, abort recovery and application restart remain unqualified.
+
 Date:13 November2026. This is a dependency audit, not a host implementation or host test. It extends the existing architecture/model/support reports08/09/07 using the current code/evidence; no application window/model was opened or modified in this task.
 
 The pure carcass design-state module is independently qualified. Production host application/export remains **BLOCKED** until the contracts below are resolved. A good preview, matching revision or source digest does not independently establish these guarantees.
