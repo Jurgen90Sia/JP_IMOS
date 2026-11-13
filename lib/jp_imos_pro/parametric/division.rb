@@ -120,6 +120,11 @@ module JPImosPro
     def allocate_division(ast:, reference:, symbols:, context:, numeric_policy:, limits: {})
       guard(DIVISION, numeric_policy, limits) do |budget|
         require_policy(numeric_policy)
+        division_value(ast:ast,reference:reference,symbols:symbols,context:context,budget:budget)
+      end
+    end
+
+    def division_value(ast:,reference:,symbols:,context:,budget:)
         unless exact_keys?(ast, [:grammar_version,:source,:tree]) && ast[:grammar_version] == DIVISION
           raise Fault.new('E_INPUT_CONTRACT', nil, 'ast')
         end
@@ -218,7 +223,6 @@ module JPImosPro
           expanded_terms: expanded, local_boundaries: boundaries, mapped_boundaries: mapped,
           internal_points: boundaries[1...-1], ratio_or_null: ratio && Value.new('Length',ratio).serialize,
           dependencies: dependencies.sort, exact: true}
-      end
     end
   end
 end
