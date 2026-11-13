@@ -19,7 +19,7 @@ module JPImosPro
           end
         end
         @steps = 0
-        if shared_counter && !shared_counter.instance_of?(WorkCounter)
+        if !shared_counter.nil? && !shared_counter.instance_of?(WorkCounter)
           raise Fault.new('E_INPUT_CONTRACT',nil,'shared_counter')
         end
         @shared_counter=shared_counter

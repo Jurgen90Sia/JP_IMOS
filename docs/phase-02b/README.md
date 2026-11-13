@@ -43,6 +43,6 @@ Quantity conversion reuses `Parametric::Value.deserialize` behind one adapter; t
 
 ## Deferred
 
-No `resolve_zones` or `prepare_revision` API is exposed. Exact frame/partition/layer mathematics, expression evaluation in zone context, containment, expanded term-to-slot reconciliation, shared engine step budgeting and real ZoneSnapshot/prepared revisions belong to the next unit. A valid authored expression string may still fail that later resolver; the codec does not claim to execute it.
+The subsequent [exact zone resolver](zones.md) now exposes `resolve_zones`, with named frames, partitions, layers, containment and shared work accounting. This first-unit codec still validates authored structure only; expressions/bounds can fail resolution. `prepare_revision` remains deferred until a separate transaction-contract implementation. No accepted host state is implied.
 
 There are no physical panels, thickness deductions, materials/BOM/drawings, SketchUp integration, persistence hooks, UI or RBZ. Source conflicts remain unchanged. No proprietary source manuals, figures, runtime binaries or credentials are included. Distribution licensing remains undecided.

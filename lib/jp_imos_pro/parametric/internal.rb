@@ -6,6 +6,7 @@ module JPImosPro
     module Internal
       module_function
       def expression(source:,symbols:,numeric_policy:,shared_counter:)
+        raise Fault.new('E_INPUT_CONTRACT') unless shared_counter.instance_of?(WorkCounter)
         budget=Budget.new({},shared_counter:shared_counter)
         Parametric.guard(CORE,numeric_policy,{},budget) do |b|
           Parametric.require_policy(numeric_policy)
@@ -16,6 +17,7 @@ module JPImosPro
         end
       end
       def division(source:,reference:,symbols:,context:,numeric_policy:,shared_counter:)
+        raise Fault.new('E_INPUT_CONTRACT') unless shared_counter.instance_of?(WorkCounter)
         budget=Budget.new({},shared_counter:shared_counter)
         Parametric.guard(DIVISION,numeric_policy,{},budget) do |b|
           Parametric.require_policy(numeric_policy)

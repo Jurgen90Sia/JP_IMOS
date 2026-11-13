@@ -16,6 +16,13 @@ class ZoneBudgetTest < Minitest::Test
     assert_operator counter.used,:>,0
     assert_raises(P::Fault) { P::WorkCounter.new(limit:100001) }
     assert_raises(P::Fault) { P::Budget.new({},shared_counter:Object.new) }
+    assert_raises(P::Fault) { P::Budget.new({},shared_counter:false) }
+    assert_raises(P::Fault) { expression(nil) }
+    roomy=P::WorkCounter.new(limit:100000)
+    local=P::Budget.new({steps:1},shared_counter:roomy)
+    e=assert_raises(P::Fault) { local.tick(2) }
+    assert_equal 'E_RESOURCE_LIMIT',e.code
+    assert_equal 2,roomy.used
   end
   def test_core_and_engine_spend_the_same_request_budget
     core=JPImosPro::ProjectCore::CoreBudget.new(work:100)

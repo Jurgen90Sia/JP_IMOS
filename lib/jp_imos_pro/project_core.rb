@@ -37,6 +37,12 @@ module JPImosPro
       result=boundary(limits) do |budget|
         validated=Document.validate(document,budget)
         begin
+          backend=numeric_policy.instance_of?(Hash) ? numeric_policy[:backend_id] : nil
+          policy_id=numeric_policy.instance_of?(Hash) ? numeric_policy[:policy_id] : nil
+          unless policy_id.instance_of?(String) && backend.instance_of?(String) && backend.valid_encoding? && [Encoding::UTF_8,Encoding::US_ASCII].include?(backend.encoding)
+            raise Parametric::Fault.new('E_INPUT_CONTRACT')
+          end
+          budget.text_bytes(backend.bytesize,'/numeric_policy/backend_id')
           Parametric.require_policy(numeric_policy)
         rescue Parametric::Fault
           raise Fault.new('E_INPUT_CONTRACT','/numeric_policy')
