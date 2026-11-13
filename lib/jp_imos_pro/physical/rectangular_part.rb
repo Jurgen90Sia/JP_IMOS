@@ -76,6 +76,13 @@ module JPImosPro
       def build(intent:,limits: {})
         result=ProjectCore.boundary(limits) do |budget|
           data=Materials::Context.copy(intent,budget,'/intent')
+          build_owned(data,budget)
+        end
+        result[:metadata]={schema:SCHEMA,profile_version:PROFILE}
+        result
+      end
+      # Trusted composition: caller has already performed the bounded data copy.
+      def build_owned(data,budget)
           unless data.instance_of?(Hash)
             raise ProjectCore::Fault.new('E_INPUT_CONTRACT','/intent')
           end
@@ -115,9 +122,6 @@ module JPImosPro
           output=validator.copy(payload)
           output['content_sha256']=Digest::SHA256.hexdigest(ProjectCore::Codec.encode(output,budget))
           validator.deep_freeze(output)
-        end
-        result[:metadata]={schema:SCHEMA,profile_version:PROFILE}
-        result
       end
     end
   end

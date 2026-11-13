@@ -5,6 +5,9 @@ module JPImosPro
       module_function
       def validate(raw,budget,prefix='')
         owned=Materials::Context.copy(raw,budget,prefix)
+        validate_owned(owned,budget,prefix)
+      end
+      def validate_owned(owned,budget,prefix='')
         if owned.instance_of?(Hash) && owned.key?('schema') && owned['schema']!=SCHEMA
           raise ProjectCore::Fault.new('E_SCHEMA_UNSUPPORTED',prefix+'/schema')
         end
