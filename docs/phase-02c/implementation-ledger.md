@@ -1,0 +1,12 @@
+# SDD ledger — plan: docs/phase-01/23-rectangular-carcass-implementation-plan.md
+User: “vazhdo punen pa nderprer pa marre miratimin tim”; decisions delegated. Native inline/TDD and one final fresh-context review.
+Base4f093921e715eb426c1198430854b82c0e77e892, branch feat/rectangular-carcass-core. Staging work/carcass, intended checkout preserved.
+Ruling: selected single butt-joint principle + explicit additive finished-stack policy; no guessed back/front/material catalog data. Output is a request-bound preview, not accepted project state; separate construction intent is not silently injected into closed project-core schema.
+Preflight: owned request -> exact Context -> rule recipes -> rectangular converter; document/policy/zone resolver and request SHA share CoreBudget. Nominal thickness never drives finished geometry.
+Tasks1 contexts;2 recipes;3 converter/public preview;4 review/qualification/integration.
+Task1 complete: missing context module observed failing; finished-stack and closed-request tests pass on both runtimes. Nominal19,substrate18.5 and0.5+0.5 surfaces resolve19.5 without catalog-verification claims.
+Task2 complete: missing carcass rule failed first; four recipe roles,564/684 opening, asymmetric562/682 and front-view independence pass on both runtimes. Rule emits recipes only; no ready geometry/host PartSpec.
+Task3 complete: absent geometry/public construction entry failed first;70 tests/1225 assertions green.8 vertices/6 outward faces, exact finished volume, bounds/contact audit, immutable atomic preview, request digest and role identity validated. Ruling: bind canonical project_document_sha256 as well as request_sha256 so unrevisioned authoring edits cannot masquerade as an identical preview context.
+Task4 complete:74 tests/1260 assertions green on real Ruby2.7.8 and3.2.9. Existing58-test baseline preserved. Final fresh-context static review found no actionable high/medium issues; later overflow-pointer regression and qualification cases were executed on both runtimes.
+Ruling: finished-stack overflow is scoped to its characteristic, not an empty pointer; observed red/green regression. An asymmetric expected bottom xmax corrected to W-R=580 for R20; production geometry was correct.
+Review artifacts generated outside repo: complete bound JSON and OBJ(4 groups,32 vertices,24 quads), independently parsed/checked for bounds/indices/source context. No production export or host import claim.
