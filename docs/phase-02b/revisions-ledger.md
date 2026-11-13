@@ -5,3 +5,4 @@ Existing checkout and writable staging work/revisions retained. One fresh-contex
 Preflight: Document.validate + CoreBudget -> Revision current/replacement comparisons -> shared validated_policy -> existing Zones::Resolver -> complete frozen prepared record. No new budget or host publication inside candidate resolution.
 Tasks:1 conflicts/no-op;2 complete candidate/snapshot;3 limits/review/integration.
 Task1 complete: missing revision module failed first;3 focused tests/42 assertions green on Ruby2.7/3.2. Ruling: helper named semantic_equal? to avoid shadowing Ruby object-identity equal?. Guards/no-op/version comparison share one caller budget.
+Task2 complete: absent public prepare_revision failed first; full54 tests/974 assertions green on Ruby2.7/3.2. Candidate and snapshot revision8 agree; labels/locale/origins and version pins preserved, source failures atomic and scoped to replacement. Policy validation extracted without weakening existing resolver tests.
