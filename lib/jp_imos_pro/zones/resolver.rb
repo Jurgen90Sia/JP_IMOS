@@ -72,6 +72,7 @@ module JPImosPro
       def layout(zone,frame,symbols,pointer,occurrence)
         layout=zone['layout']
         return [[],{}] if layout['kind']=='leaf'
+        return layers(layout,frame,symbols,pointer,occurrence) if layout['kind']=='independent_layers'
         unless layout['kind']=='partition'
           raise ProjectCore::Fault.new('E_UNSUPPORTED_GRAMMAR',pointer+'/layout',occurrence)
         end
@@ -97,6 +98,44 @@ module JPImosPro
           end
           position=ending
         end
+        [occupied,boxes]
+      end
+      def layers(layout,frame,symbols,pointer,occurrence)
+        occupied,boxes,errors=[],{},[]
+        layout['placements'].each_with_index do |placement,i|
+          @budget.tick(pointer)
+          pp="#{pointer}/layout/placements/#{i}/bounds"
+          resolved,offset,extents={},[],[]
+          valid=true
+          %w[u v w].each_with_index do |axis,k|
+            values=[]
+            placement['bounds'][axis].each_with_index do |spec,j|
+              begin
+                values[j]=EngineBridge.expression(spec:spec,symbols:symbols,pointer:"#{pp}/#{axis}/#{j}/source",
+                  occurrence_ref:occurrence,policy:@policy,budget:@budget)
+              rescue ProjectCore::Fault => e
+                raise if e.code=='E_RESOURCE_LIMIT'
+                errors << e
+                valid=false
+              end
+            end
+            next unless values[0] && values[1]
+            start,ending=values.map { |v| EngineBridge.rational(v) }
+            unless start>=0 && start<ending && ending<=frame[:extents][k]
+              errors << ProjectCore::Fault.new('E_ZONE_CONTAINMENT',"#{pp}/#{axis}",occurrence)
+              valid=false
+              next
+            end
+            resolved[axis]=values
+            offset[k]=start
+            extents[k]=Frame.safe(ending-start,@budget)
+          end
+          if valid
+            occupied << {'slot_id'=>placement['id'],'role'=>'layer','bounds'=>resolved}
+            boxes[placement['id']]={offset:offset,extents:extents}
+          end
+        end
+        raise errors.min_by(&:json_pointer) unless errors.empty?
         [occupied,boxes]
       end
     end

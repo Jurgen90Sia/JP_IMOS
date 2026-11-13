@@ -19,6 +19,21 @@ module ZoneFixtures
   def resolve(doc=valid_document,limits={})
     JPImosPro::ProjectCore.resolve_zones(document:doc,numeric_policy:policy,limits:limits)
   end
+  def layers(count=2)
+    doc=valid_document
+    root=doc['definitions'][0]['zones'][0]
+    placements=Array.new(count) do |i|
+      bounds={}
+      %w[u v w].each_with_index do |axis,k|
+        bounds[axis]=['0mm',%w[ZONE_U ZONE_V ZONE_W][k]].map { |s| {'grammar_version'=>'jp-core-v1','source'=>s,'expected_type'=>'Length'} }
+      end
+      {'id'=>uuid(100+i),'bounds'=>bounds}
+    end
+    root['layout']={'kind'=>'independent_layers','placements'=>placements}
+    root['children']=Array.new(count) { |i| {'zone_id'=>uuid(10+i),'slot_id'=>uuid(100+i)} }
+    doc['definitions'][0]['zones'] += Array.new(count) { |i| leaf(10+i) }
+    doc
+  end
   def rationals(values)
     values.map { |v| Rational(v['numeric']['numerator'],v['numeric']['denominator']) }
   end
