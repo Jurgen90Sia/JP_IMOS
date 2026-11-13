@@ -5,3 +5,4 @@ Ruling: selected single butt-joint principle + explicit additive finished-stack 
 Preflight: owned request -> exact Context -> rule recipes -> rectangular converter; document/policy/zone resolver and request SHA share CoreBudget. Nominal thickness never drives finished geometry.
 Tasks1 contexts;2 recipes;3 converter/public preview;4 review/qualification/integration.
 Task1 complete: missing context module observed failing; finished-stack and closed-request tests pass on both runtimes. Nominal19,substrate18.5 and0.5+0.5 surfaces resolve19.5 without catalog-verification claims.
+Task2 complete: missing carcass rule failed first; four recipe roles,564/684 opening, asymmetric562/682 and front-view independence pass on both runtimes. Rule emits recipes only; no ready geometry/host PartSpec.
