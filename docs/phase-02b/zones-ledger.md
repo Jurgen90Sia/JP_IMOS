@@ -5,3 +5,4 @@ Preflight: WorkCounter -> CoreBudget/engine Budget -> Frame + EngineBridge -> Re
 Tasks: 1 shared budgets; 2 frames; 3 partition snapshots; 4 layers; 5 diagnostics/limits/cross-version review. Prepared revisions/host/geometry remain excluded.
 Task1 complete: missing WorkCounter failed first; full34 tests/715 assertions green. Ruby2.7 keyword-hash regression caught by existing limits tests and corrected with positional trusted guard argument; public signatures unchanged.
 Task2 complete: missing frame module failed first, then36 tests/731 assertions green. Exact signed-permutation bases, front-under-front composition, rational coordinates and4096-bit overflow guarded.
+Task3 complete: missing resolve_zones failed first;40 tests/788 assertions green. Immutable closed snapshots, exact positive partitions, reservations, stable occurrences, frame/translation composition and atomic wrapped diagnostics. Layers explicitly unsupported only until Task4.
