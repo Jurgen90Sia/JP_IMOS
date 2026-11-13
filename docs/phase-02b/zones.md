@@ -45,3 +45,5 @@ Run the complete suite using `ruby test/all_test.rb`. Production uses Ruby stdli
 ## Deferred scope
 
 [Pure revision preparation](revisions.md) is now implemented. Accepted host transactions, persistence/undo, physical construction, materials, BOM, drawings, UI and RBZ remain unimplemented. Source conflicts SC01/SC04/SC08/SC15 remain unresolved; explicit authored spans keep them outside automatic construction decisions. No source PDF, figure, extracted manual, runtime binary or external expression implementation is vendored.
+
+The later [Phase 2C preview](../phase-02c/README.md) implements one explicit four-panel finished-envelope rule; accepted physical construction, catalog integration and host state remain outside this zone API.

@@ -71,6 +71,9 @@ module JPImosPro
           'far_surface_thickness'=>Zones::EngineBridge.length(far),'finished_stack_thickness'=>Zones::EngineBridge.length(total),
           'material_reference_status'=>'caller_declared_unverified_catalog')
         ProjectCore::Document.new(budget).deep_freeze(result)
+      rescue ProjectCore::Fault => e
+        raise unless e.json_pointer.empty?
+        raise ProjectCore::Fault.new(e.code,pointer,e.entity_ref,e.details,e.engine)
       end
     end
   end

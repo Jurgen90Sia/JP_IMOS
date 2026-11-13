@@ -48,4 +48,10 @@ class RectangularPanelTest < Minitest::Test
     input=recipe;input['frame']['basis']=[[1,0,0],[0,1,0],[0,0,-1]]
     assert_equal 'E_INVALID_GEOMETRY',assert_raises(C::Fault) { G.from_recipe(recipe:input,budget:C::CoreBudget.new({})) }.code
   end
+  def test_volume_overflow_is_rejected_before_an_output_is_returned
+    input=recipe;input['face_size']=[length(1<<2048),length(1<<2048)];input['finished_thickness']=length(1)
+    e=assert_raises(C::Fault) { G.from_recipe(recipe:input,budget:C::CoreBudget.new({})) }
+    assert_equal 'E_RESOURCE_LIMIT',e.code
+    refute input.frozen?
+  end
 end

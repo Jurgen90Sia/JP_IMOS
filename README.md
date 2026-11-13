@@ -39,3 +39,7 @@ The project-core codec/validation unit is authorized; exact zone resolution is i
 The next arithmetic slice is described in the [exact zone-resolver implementation plan](docs/phase-01/20-zone-resolver-implementation-plan.md). It reuses the merged project-core contracts; revision preparation is documented separately and SketchUp geometry remains future work. This plan was approved and executed; see [zone qualification](docs/phase-02b/zones-validation.md).
 
 The [prepared-revision plan](docs/phase-01/21-prepared-revisions-implementation-plan.md) closes the pure-core revision contract. See [revision qualification](docs/phase-02b/revisions-validation.md); preparation does not publish accepted host state.
+
+## Rectangular construction preview
+
+The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit finished material stacks and four rectangular panel recipes with exact finished-envelope geometry. Source context includes canonical project/request digests. This is a review preview, with caller-declared material references, and does not publish accepted host/project state. See [qualification](docs/phase-02c/validation.md).

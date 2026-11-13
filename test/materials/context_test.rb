@@ -58,4 +58,12 @@ class FinishedContextTest < Minitest::Test
     input=request;input['panels'].delete('right')
     assert_equal 'E_INPUT_CONTRACT',assert_raises(C::Fault) { JPImosPro::Construction::Request.validate(input,C::CoreBudget.new({})) }.code
   end
+  def test_numeric_stack_overflow_has_the_characteristic_pointer
+    input=characteristic
+    input['finished_substrate_thickness']=length((1<<4096)-1)
+    input['dimensional_surfaces']=[surface('near',1)]
+    e=assert_raises(C::Fault) { resolve_context(input) }
+    assert_equal 'E_RESOURCE_LIMIT',e.code
+    assert_equal '/characteristic',e.json_pointer
+  end
 end
