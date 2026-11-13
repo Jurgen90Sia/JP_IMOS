@@ -31,6 +31,7 @@ module JPImosPro
       ProjectCore::Revision.check_replacement(current,replacement,budget)
     rescue ProjectCore::Fault => e
       path=e.json_pointer.start_with?('/replacement') ? '/replacement/project'+e.json_pointer.delete_prefix('/replacement') : e.json_pointer
+      path='/current/project'+path.delete_prefix('/current') if path.start_with?('/current')
       raise ProjectCore::Fault.new(e.code,path,e.entity_ref,e.details,e.engine)
     end
     def prepare_revision(current:,replacement:,expected_revision:,numeric_policy:,limits: {})

@@ -35,3 +35,5 @@ The preview is not an accepted furniture Snapshot or another live project store.
 One CoreBudget covers document/request copies, material contexts, policy, full zone resolution, recipes, geometry/audit, hashing and freezing. Rational intermediates remain4096-bit bounded. Limits may tighten only. Any failure returns value=nil with no partial panels. Input/policy objects are not mutated/frozen. Context numerical errors carry a characteristic pointer; project errors are scoped /document and construction errors /request.
 
 Run `ruby test/all_test.rb` on Ruby2.7/3.2. Existing core tests remain included. No backing/front/shelves, general contour holes, angled junctions, substrate/edge manufacturing geometry, catalog import, BOM, drawings, UI, native apply/undo, RBZ or machining module is implemented.
+
+The later [revision-bound design state](../phase-02d/README.md) now owns construction intent alongside the core component. The standalone preview remains a component; accepted host/material/PartSpec readiness is still [blocked explicitly](../phase-02d/host-readiness.md).

@@ -11,10 +11,12 @@ module JPImosPro
         rescue ProjectCore::Fault => e
           raise ProjectCore::Fault.new(e.code,'/project'+e.json_pointer,e.entity_ref,e.details,e.engine)
         end
-        previews=state['construction_requests'].each_with_index.map do |request,i|
+        previews=Array.new(state['construction_requests'].size)
+        (0...state['construction_requests'].size).sort_by { |i| i.to_s }.each do |i|
+          request=state['construction_requests'][i]
           budget.tick('/construction_requests')
           begin
-            Construction.preview_from_validated(document:project,request:request,zone_snapshot:zones,
+            previews[i]=Construction.preview_from_validated(document:project,request:request,zone_snapshot:zones,
               project_sha:project_sha,policy:policy,budget:budget)
           rescue ProjectCore::Fault => e
             path=e.json_pointer.start_with?('/request') ? e.json_pointer.delete_prefix('/request') : e.json_pointer

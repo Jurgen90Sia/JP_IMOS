@@ -43,3 +43,7 @@ The [prepared-revision plan](docs/phase-01/21-prepared-revisions-implementation-
 ## Rectangular construction preview
 
 The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit finished material stacks and four rectangular panel recipes with exact finished-envelope geometry. Source context includes canonical project/request digests. This is a review preview, with caller-declared material references, and does not publish accepted host/project state. See [qualification](docs/phase-02c/validation.md).
+
+## Revision-bound construction authoring
+
+[Carcass Design State](docs/phase-02d/README.md) owns the project component and construction requests under one revision, with atomic complete prepared snapshots. See [qualification](docs/phase-02d/validation.md). Production host/export integration remains [blocked by explicit material, PartSpec and persistence contracts](docs/phase-02d/host-readiness.md); this data module does not bypass them.
