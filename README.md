@@ -51,3 +51,5 @@ The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit fini
 ## Local physical part profile
 
 [Rectangular Physical Part](docs/phase-02f/rectangular-physical-part.md) now prepares exact substrate, finished-envelope and ordered surface-layer solids from an explicit local intent. Grain and all four unbanded edges are required. Nominal purchase thickness is separate from actual geometry. This local builder returns `prepared_unbound_part`; it is not yet connected to revision-owned project authoring, verified catalog bindings or production host acceptance. Existing material-bound snapshots retain their established finished-preview contract.
+
+[Native physical-part qualification](docs/phase-02f/native-validation.md) passed on SketchUp2021 / embedded Ruby2.7.1: four fixtures,17 solid measurements and four refusal cases. This scoped scratch-host result does not qualify production persistence, undo/reopen or other SketchUp versions.
