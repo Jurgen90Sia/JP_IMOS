@@ -57,3 +57,5 @@ The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit fini
 ## Revision-owned physical design
 
 [Physical Design State](docs/phase-02g/physical-design-state.md) now owns carcass authoring, the declared material registry and complete part grain/edge policies under one project revision. It rebuilds and binds physical parts to that exact state/catalog, preserves surviving part identities on resize and rejects changes to existing catalog-version contents. This is a prepared supported snapshot, not host/session acceptance; no canonical model persistence or native transaction adapter is installed.
+
+[Physical Checkpoint](docs/phase-02h/physical-checkpoint.md) provides a canonical source-only JSON persistence format with verification hashes and an explicit numeric policy/backend. Decode rebuilds parts and rejects inconsistent bindings; it does not import cached geometry. This pure codec does not write files or SketchUp model dictionaries and does not mark a revision accepted.
