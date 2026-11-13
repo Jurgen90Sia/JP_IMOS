@@ -4,15 +4,15 @@ module JPImosPro
     module Parameters
       RESERVED = %w[pi true false X Y abs min max if sin cos tan asin acos ZONE_U ZONE_V ZONE_W].freeze
       module_function
-      def validate_all(document,budget)
+      def validate_all(document,budget,index)
         document['definitions'].each_with_index do |definition,i|
           validate_definition(definition,"/definitions/#{i}",budget)
         end
         document['articles'].each_with_index do |instance,i|
           budget.tick("/articles/#{i}")
           ref = instance['definition_ref']
-          definition = document['definitions'].find { |d| d['id']==ref['id'] && d['version']==ref['version'] }
-          bind(instance,definition,"/articles/#{i}",budget) if definition
+          definition = index.fetch([ref['id'],ref['version']])
+          bind(instance,definition,"/articles/#{i}",budget)
           instance['origin'].each_with_index { |v,j| exact!(v,"/articles/#{i}/origin/#{j}") }
         end
       end

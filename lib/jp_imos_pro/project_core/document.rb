@@ -21,7 +21,8 @@ module JPImosPro
           'schema'=>[:enum,[SCHEMA]],'project_id'=>:uuid,'revision'=>:revision,
           'locale'=>[:enum,%w[sq en]],'units'=>[:enum,['mm']],
           'definitions'=>[:array,:definition,:definitions], 'articles'=>[:array,:article,:articles]},'')
-        Parameters.validate_all(result,@budget)
+        index = References.validate(result,@budget)
+        Parameters.validate_all(result,@budget,index)
         deep_freeze(result)
       end
       def copy(raw)

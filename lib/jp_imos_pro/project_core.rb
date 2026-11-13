@@ -6,6 +6,7 @@ require_relative 'parametric'
 require_relative 'project_core/quantities'
 require_relative 'project_core/document'
 require_relative 'project_core/parameters'
+require_relative 'project_core/references'
 
 module JPImosPro
   module ProjectCore
