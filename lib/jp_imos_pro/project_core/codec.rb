@@ -13,6 +13,13 @@ module JPImosPro
         end
       end
       module_function
+      def encode(document, budget)
+        output = JSON.generate(document, max_nesting: budget.limit(:json_depth), allow_nan: false)
+        budget.cap(output.bytesize,:json_bytes,'')
+        output.force_encoding(Encoding::UTF_8)
+      rescue JSON::NestingError
+        raise Fault.new('E_RESOURCE_LIMIT')
+      end
       def parse(source, budget)
         unless source.instance_of?(String) && source.valid_encoding? &&
             [Encoding::UTF_8, Encoding::US_ASCII].include?(source.encoding)
