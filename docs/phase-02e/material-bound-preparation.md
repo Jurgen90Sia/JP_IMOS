@@ -26,13 +26,13 @@ Files: modify `lib/jp_imos_pro/materials/catalog.rb`; create `lib/jp_imos_pro/de
 - [x] Run the focused test and observe the absent entry point before implementation.
 - [x] Extract the owned reference report helper and implement `prepare` with one budget and no nested public calls.
 - [x] Run focused and complete tests on Ruby 2.7.8 and 3.2.9; review compatibility, resource accounting, diagnostic paths and ownership.
-- [ ] Record native scratch-host evidence separately from production host qualification; update readiness, commit and publish the branch/PR under existing authorization.
+- [x] Record native scratch-host evidence separately from production host qualification; update readiness, commit and publish the branch/PR under existing authorization.
 
 Review focus: forged derived state; independently changed registry content; shared nested input mutation; aggregate limits across material and geometry work; empty-state behavior. Each is covered by a corresponding focused test. General PartSpec acceptance, persistence, undo/reopen and graphical host inspection remain outside this unit.
 
 ## Qualification and execution ledger
 
-Baseline: main `25b949f68625ea1054d9ec4f194fba0ec443b329`, clean; Ruby 2.7.8 suite 91 tests / 1,433 assertions passed. Isolated linked checkout on `feat/material-bound-preparation`. Native worktree creation was unavailable for this projectless chat; the Git fallback created a separate checkout without changing main.
+Baseline: main `25b949f68625ea1054d9ec4f194fba0ec443b329`, clean; Ruby 2.7.8 suite 91 tests / 1,433 assertions passed. Isolated linked checkout on `feat/material-bound-preparation`. The native worktree helper rejected the attempted arguments; the Git fallback created a separate checkout without changing main.
 
 Task 1: RED observed 8 missing-entry-point errors before implementation. GREEN first focused run: 8 tests / 59 assertions. Additional aggregate-budget and construction-failure qualification brought the total to 101 tests / 1,505 assertions; full suite passed on Ruby 2.7.8 and 3.2.9, no failures/errors/skips. At work=16,000 standalone reference checking and standalone carcass geometry both succeed, while aggregate preparation fails atomically, deterministically; a default-budget retry succeeds. Tests also retain all 91 baseline cases.
 
@@ -41,3 +41,7 @@ Task 1 Ruling: the existing authored width parameter is `W`, not `width`; the fi
 Native qualification is recorded in [scratch validation](native-scratch-validation.md), separately from this standalone module's tests. The previous user-executed fixture was not rerun on the later material preparation code. No second native execution or graphical inspection is claimed.
 
 Next dependencies: supported physical PartSpec with explicit substrate/finished/surface/edge/grain semantics; accepted-state model dictionary and compare-and-swap transaction; native apply/undo/abort/reopen qualification; then host UI/packaging and dependent drawing modules. Unknown manufacturer characteristics and unresolved manual formulas remain unresolved rather than guessed.
+
+Final review: independent fresh-context read-only review of `25b949f..5dc4bda` approved with no Critical/Important/Minor findings. The reviewer independently reran Ruby 3.2.9 (101 tests / 1,505 assertions passed). The implementer ran both supported standalone runtimes. No fixes or deferred minors were requested. Published as PR #8.
+
+Final Ruling: the reviewer did not independently judge the historical native measurements or Ruby 2.7 execution. Those claims retain their separate observed host evidence and implementer runtime logs, without upgrading the reviewer scope. General PartSpec and host transaction semantics remain explicitly unresolved dependencies, not approved production behavior; treating this package as accepted host state would invalidate that boundary.
