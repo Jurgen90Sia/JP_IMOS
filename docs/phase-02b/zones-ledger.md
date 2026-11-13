@@ -1,0 +1,13 @@
+# SDD ledger — plan: docs/phase-01/20-zone-resolver-implementation-plan.md
+User approved execution with “vazhdo punen”. Base fecbd1032fc6501eae6b4b1b0d78eb80982bf0cc; feature branch feat/exact-zone-resolver.
+Native inline TDD and one final fresh-context review; existing checkout preference retained. Scratch staging work/zones, same established Windows copy/commit workflow, no unrelated work removed.
+Preflight: WorkCounter -> CoreBudget/engine Budget -> Frame + EngineBridge -> Resolver -> complete frozen snapshot. Parameters and definition pins are already validated. One request counter must survive every stage.
+Tasks: 1 shared budgets; 2 frames; 3 partition snapshots; 4 layers; 5 diagnostics/limits/cross-version review. Prepared revisions/host/geometry remain excluded.
+Task1 complete: missing WorkCounter failed first; full34 tests/715 assertions green. Ruby2.7 keyword-hash regression caught by existing limits tests and corrected with positional trusted guard argument; public signatures unchanged.
+Task2 complete: missing frame module failed first, then36 tests/731 assertions green. Exact signed-permutation bases, front-under-front composition, rational coordinates and4096-bit overflow guarded.
+Task3 complete: missing resolve_zones failed first;40 tests/788 assertions green. Immutable closed snapshots, exact positive partitions, reservations, stable occurrences, frame/translation composition and atomic wrapped diagnostics. Layers explicitly unsupported only until Task4.
+Task4 complete: independent layers first failed as unsupported;43 tests/829 assertions green after implementation. Coextensive layers, exact containment, fractional endpoints, endpoint typing/inexactness and unknown lazy-branch symbols tested.
+Task5 complete:48 tests/891 assertions green on real Ruby2.7.8 and3.2.9, including the existing32-test baseline. Whole-request10000 budget exhausts for many valid endpoint expressions; normal100000 succeeds; fresh requests recover independently. Frozen snapshots, lexical errors, malformed policies, trusted-counter types and backend byte quota have observed regressions.
+Review: one fresh-context review; malformed backend encoding issue corrected before engine string operations. Additional policy_id type guard rejects unknown host equality callbacks. No remaining critical/high findings deferred from this review.
+Ruling: backend encoding/type and byte quota checked before policy string operations/copy — invalid data must return structured diagnostics and metadata must not bypass limits — non-UTF8 backends rejected at zone boundary.
+Ruling: prepare_revision remains deferred, matching the approved plan. No host acceptance, UI, physical geometry or production extension scaffolding added. Historical14 preserved.

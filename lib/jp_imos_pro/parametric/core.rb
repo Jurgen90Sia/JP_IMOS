@@ -10,7 +10,7 @@ module JPImosPro
     end
 
     class Budget
-      def initialize(limits)
+      def initialize(limits, shared_counter: nil)
         raise Fault.new('E_INPUT_CONTRACT', nil, 'limits') unless limits.is_a?(Hash)
         @limits = DEFAULT_LIMITS.merge(limits)
         limits.each do |key, value|
@@ -19,11 +19,16 @@ module JPImosPro
           end
         end
         @steps = 0
+        if !shared_counter.nil? && !shared_counter.instance_of?(WorkCounter)
+          raise Fault.new('E_INPUT_CONTRACT',nil,'shared_counter')
+        end
+        @shared_counter=shared_counter
       end
       def limit(key)
         @limits.fetch(key)
       end
       def tick(count = 1)
+        @shared_counter.tick(count) if @shared_counter
         @steps += count
         raise Fault.new('E_RESOURCE_LIMIT') if @steps > limit(:steps)
       end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 require_relative 'parametric/core'
 require_relative 'parametric/division'
+require_relative 'parametric/work_counter'
+require_relative 'parametric/internal'
 
 module JPImosPro
   module Parametric
@@ -22,8 +24,8 @@ module JPImosPro
       value.is_a?(String) && value.valid_encoding? && value.encoding.ascii_compatible? && value.ascii_only?
     end
 
-    def guard(grammar, policy = nil, limits = {})
-      budget = Budget.new(limits)
+    def guard(grammar, policy = nil, limits = {}, budget = nil)
+      budget ||= Budget.new(limits)
       if policy && (!policy.is_a?(Hash) || policy[:policy_id] != POLICY ||
           !policy[:backend_id].is_a?(String) || policy[:backend_id].strip.empty?)
         raise Fault.new('E_INPUT_CONTRACT', nil, 'numeric_policy')

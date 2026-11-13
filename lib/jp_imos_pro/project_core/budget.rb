@@ -2,6 +2,7 @@
 module JPImosPro
   module ProjectCore
     class CoreBudget
+      attr_reader :counter
       DEFAULTS = {json_bytes: 1_048_576, json_depth: 64, definitions: 100,
         articles: 100, zones: 1000, occurrences: 10_000, zone_depth: 32,
         parameters: 256, label_chars: 256, work: 100_000}.freeze
@@ -13,13 +14,15 @@ module JPImosPro
           end
         end
         @limits, @work, @text_bytes = DEFAULTS.merge(limits), 0, 0
+        @counter=Parametric::WorkCounter.new(limit:@limits[:work])
       end
       def limit(key)
         @limits.fetch(key)
       end
       def tick(pointer = '', count = 1)
-        @work += count
-        raise Fault.new('E_RESOURCE_LIMIT', pointer) if @work > limit(:work)
+        @counter.tick(count)
+      rescue Parametric::Fault
+        raise Fault.new('E_RESOURCE_LIMIT',pointer)
       end
       def cap(size, key, pointer)
         raise Fault.new('E_RESOURCE_LIMIT', pointer) if size > limit(key)
