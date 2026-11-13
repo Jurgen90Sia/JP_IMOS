@@ -24,7 +24,7 @@ Task1 files: create `lib/jp_imos_pro/design/physical_checkpoint.rb`, `test/desig
 - [x] Implement bounded source-only encoding/rebuilding decode using owned helpers, no nested public boundary or file operation.
 - [x] GREEN: full suites on Ruby2.7.8/3.2.9, independent review and published PR #12 under standing integration authorization.
 
-Review focus: treating checksum as source authority; accepting a stale snapshot hash after repaired checksum; silently rebinding another numeric backend; freezing caller strings/state; resetting work during rebuild. Each has a focused test. Native persistence/transactions remain NOT RUN for this codec.
+Review focus: treating checksum as source authority; accepting a stale snapshot hash after repaired checksum; silently rebinding another numeric backend; freezing caller strings/state; resetting work during rebuild. Each has a focused test. Subsequent [native draft storage/reopen qualification](native-checkpoint-validation.md) passed in a probe-only dictionary; production persistence/transactions remain unresolved and NOT RUN.
 
 ## Qualification ledger
 
