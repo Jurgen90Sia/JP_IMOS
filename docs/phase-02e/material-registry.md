@@ -1,0 +1,9 @@
+# User-declared material reference registry: design, execution and qualification
+
+Scope selected under autonomous authorization: verify exact UUID/version/category references against a closed caller-provided registry snapshot. No catalog fabrication, manufacturer verification or host acceptance. Schema jpimos.material-catalog/1 owns entries{id,version,label,category(panel/surface),provenance{kind:user_declared,note}}. Unknown fields/verification claims fail. Versions are positive safe integers, canonical UUIDs; duplicates fail. Existing exact state and request policies are unchanged.
+
+API: JPImosPro::Materials::Catalog.verify_references(state:,catalog:,limits:{}). Result is immutable jpimos.material-reference-report/1 with registry_resolved_user_declared status, state/catalog digests and scoped bindings. Missing pins/category mismatches fail atomically. The full state and registry share CoreBudget. Entries are sorted for catalog hashing; no history or immutable-version publication registry is claimed.
+
+Implementation plan/execution: failing missing-module tests first; bounded owned registry validation; reference resolution for substrate and every dimensional surface; canonical binding hashes/freezing; both Ruby runtimes/full baseline; one fresh-context review; publication/integration. Files materials/catalog.rb and test/materials/catalog_test.rb only; no new runtime dependency.
+
+Reviewer found no concrete safety/reference/ownership/hash bug; suggested hash coverage was added. Tests cover closed records, missing/duplicate/category/pin errors, rejected manufacturer_verified claim, resources, nested ownership, canonical hash stability and content changes. This report does not upgrade existing previews' catalog status or create accepted general PartSpecs, native dictionaries, loaders, RBZ or exporters. Those inherited host dependencies remain unresolved. Original87-test baseline retained; final runtime counts recorded during verification.
