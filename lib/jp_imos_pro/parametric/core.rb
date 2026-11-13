@@ -234,6 +234,25 @@ module JPImosPro
           op, a, b = args
           x, y = type(a, depth + 1), type(b, depth + 1)
           binary_type(op, x, y, tree)
+        when :call
+          name, children = args
+          types = children.map { |child| type(child, depth + 1) }
+          case name
+          when 'if'
+            fault('E_UNIT_MISMATCH', tree) unless types.size == 3 && types[0] == 'Boolean' && types[1] == types[2]
+            types[1]
+          when 'min', 'max'
+            fault('E_UNIT_MISMATCH', tree) unless types.size.between?(2, 16) && types.uniq.size == 1 && %w[Scalar Length].include?(types[0])
+            types[0]
+          when 'abs'
+            fault('E_UNIT_MISMATCH', tree) unless types.size == 1 && %w[Scalar Length].include?(types[0])
+            types[0]
+          when 'sin', 'cos', 'tan', 'asin', 'acos'
+            fault('E_UNIT_MISMATCH', tree) unless types == ['Scalar']
+            'Scalar'
+          else
+            fault('E_UNKNOWN_FUNCTION', tree)
+          end
         else
           fault('E_UNKNOWN_FUNCTION', tree)
         end
@@ -278,7 +297,50 @@ module JPImosPro
         when :binary
           op, a, b = args
           operate(op, value(a), value(b), tree)
+        when :call
+          name, children = args
+          return value(children[value(children[0]).n ? 1 : 2]) if name == 'if'
+          values = children.map { |child| value(child) }
+          exact = values.all?(&:exact)
+          if %w[min max abs].include?(name)
+            nums = values.map(&:n)
+            n = case name
+            when 'min' then nums.min
+            when 'max' then nums.max
+            when 'abs' then nums[0].abs
+            end
+            return Value.new(values[0].kind, @budget.number(n), exact)
+          end
+          n = values[0].n
+          inverse = %w[asin acos].include?(name)
+          fault('E_FUNCTION_DOMAIN', tree) if (inverse && n.abs > 1) || (!inverse && n.abs > 1_000_000)
+          x = n.to_f
+          fault('E_FUNCTION_DOMAIN', tree) if name == 'tan' && Math.cos(x).abs < 1e-12
+          result = case name
+          when 'sin' then Math.sin(x)
+          when 'cos' then Math.cos(x)
+          when 'tan' then Math.tan(x)
+          when 'asin' then Math.asin(x)
+          when 'acos' then Math.acos(x)
+          end
+          fault('E_FUNCTION_DOMAIN', tree) unless result && result.finite?
+          Value.new('Scalar', @budget.number(round_significant(result.to_r)), false)
         end
+      end
+      # Round the exact binary64 value, never its shortest display string.
+      def round_significant(r)
+        return Rational(0) if r.zero?
+        magnitude = r.abs
+        exponent = magnitude.numerator.to_s.length - magnitude.denominator.to_s.length
+        scale = exponent >= 0 ? Rational(10**exponent) : Rational(1, 10**(-exponent))
+        exponent -= 1 if magnitude < scale
+        places = 14 - exponent
+        factor = places >= 0 ? Rational(10**places) : Rational(1, 10**(-places))
+        scaled = magnitude * factor
+        integer, rest = scaled.numerator.divmod(scaled.denominator)
+        twice = rest * 2
+        integer += 1 if twice > scaled.denominator || (twice == scaled.denominator && integer.odd?)
+        (r < 0 ? -integer : integer) / factor
       end
       def operate(op, a, b, tree)
         kind = binary_type(op, a.kind, b.kind, tree)

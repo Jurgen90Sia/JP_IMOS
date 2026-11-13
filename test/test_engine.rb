@@ -40,4 +40,20 @@ class EngineTest < Minitest::Test
     error('E_RESOURCE_LIMIT', expression('1'*4097))
     error('E_RESOURCE_LIMIT', expression('('*33+'1'+')'*33))
   end
+  def test_functions_are_typed_and_conditional_is_lazy
+    assert_in_delta 1, number(expression('sin(pi/2)')).to_f, 1e-12
+    refute expression('sin(pi/2)')[:value][:numeric][:exact]
+    assert_equal 10, number(expression('if(true,10mm,1mm/0)'))
+    assert_equal 7, number(expression('max(abs(-3),min(7,8))'))
+    assert_equal 1, number(expression('5%2'))
+    error('E_UNIT_MISMATCH', expression('if(true,10mm,1)'))
+    error('E_UNKNOWN_SYMBOL', expression('if(true,1,missing)'))
+    error('E_FUNCTION_DOMAIN', expression('asin(2)'))
+    error('E_FUNCTION_DOMAIN', expression('tan(pi/2)'))
+    error('E_UNKNOWN_FUNCTION', expression('atan(1)'))
+    error('E_DIV_ZERO', expression('1/0'))
+    error('E_DOMAIN', expression('-1%2'))
+    error('E_SYNTAX', expression('1<2<3'))
+    error('E_UNSUPPORTED_GRAMMAR', expression('2**3'))
+  end
 end
