@@ -5,9 +5,30 @@ module JPImosPro
       def parse
         terms = []
         loop do
-          tree = sum(0)
-          syntax('E_UNSUPPORTED_GRAMMAR') if ['{', '['].include?(peek)
-          terms << {tree: tree, count: 1, quantum: nil}
+          count = 1
+          if @tokens[@index + 1] && @tokens[@index + 1][0] == '{'
+            token = take
+            syntax('E_UNSUPPORTED_GRAMMAR') unless /\A[1-9][0-9]*\z/.match?(token[0])
+            count = token[0].to_i
+            raise Fault.new('E_RESOURCE_LIMIT') if count > @budget.limit(:expanded_segments)
+            take
+            tree = sum(0)
+            syntax('E_UNSUPPORTED_GRAMMAR') unless peek == '}'
+            take
+          else
+            tree = sum(0)
+          end
+          quantum = nil
+          if peek == '['
+            syntax('E_UNSUPPORTED_GRAMMAR') unless count == 1
+            take
+            quantum = unary(0)
+            syntax('E_UNSUPPORTED_GRAMMAR') unless quantum[0] == :unit && quantum[1][1][0] == :literal
+            expect(']')
+          end
+          syntax('E_UNSUPPORTED_GRAMMAR') if ['{', '[', '}'].include?(peek)
+          terms << {tree: tree, count: count, quantum: quantum}
+          raise Fault.new('E_RESOURCE_LIMIT') if terms.sum { |term| term[:count] } > @budget.limit(:expanded_segments)
           break unless peek == ':'
           take
         end
@@ -101,6 +122,10 @@ module JPImosPro
         end
         terms = DivisionParser.new(ast[:source], budget).parse
         raise Fault.new('E_INPUT_CONTRACT', nil, 'ast.tree') unless terms == ast[:tree]
+        terms = terms.flat_map do |term|
+          budget.tick(term[:count])
+          Array.new(term[:count]) { {tree: term[:tree], count: 1, quantum: term[:quantum]} }
+        end
         unless reference.is_a?(Hash) && reference.keys.sort == [:direction,:length,:origin] && [1,-1].include?(reference[:direction]) && reference[:direction].is_a?(Integer)
           raise Fault.new('E_INPUT_CONTRACT', nil, 'reference')
         end
@@ -132,6 +157,19 @@ module JPImosPro
           raise Fault.new('E_NEGATIVE_WEIGHT', term[:tree][2]) if gap.weight < 0
           gap
         end
+        quantized = terms.each_index.select { |i| terms[i][:quantum] }
+        quantum = nil
+        unless quantized.empty?
+          raise Fault.new('E_UNSUPPORTED_GRAMMAR') unless quantized.size == 1
+          qi = quantized.first
+          unless gaps[qi].weight == 1 && gaps[qi].fixed.zero? && gaps.each_with_index.all? { |gap,i| i == qi || gap.weight.zero? }
+            raise Fault.new('E_UNSUPPORTED_GRAMMAR')
+          end
+          evaluator.type(terms[qi][:quantum])
+          quantum = evaluator.value(terms[qi][:quantum])
+          raise Fault.new('E_INEXACT_DIVISION_INPUT') unless quantum.exact
+          raise Fault.new('E_UNSUPPORTED_GRAMMAR') unless quantum.kind == 'Length' && quantum.n > 0
+        end
         w, f = Rational(0), Rational(0)
         gaps.each do |gap|
           w = budget.number(w + gap.weight)
@@ -150,14 +188,21 @@ module JPImosPro
           budget.tick
           solved = budget.number(budget.number(gap.weight * (ratio || 0)) + gap.fixed)
           terminal = i.zero? || i == gaps.size - 1
-          allowed_marker = gap.weight.zero? || (gap.weight.zero? && gap.fixed.zero?)
+          allowed_marker = gap.weight.zero?
           unless solved > 0 || (context == 'reference_points' && terminal && allowed_marker)
             raise Fault.new('E_DEGENERATE_INTERVAL', terms[i][:tree][2], nil, [], {term_index: i})
           end
           position = budget.number(position + solved)
           boundaries << {id: "b#{i+1}", position: Value.new('Length', position).serialize}
-          {id: "t#{i}", weight: Value.new('Scalar',gap.weight).serialize,
+          term_result = {id: "t#{i}", weight: Value.new('Scalar',gap.weight).serialize,
             fixed: Value.new('Length',gap.fixed).serialize, length: Value.new('Length',solved).serialize}
+          if quantum && quantized.first == i
+            count = budget.number(solved / quantum.n)
+            raise Fault.new('E_QUANTIZATION_INFEASIBLE') unless count > 0 && count.denominator == 1
+            term_result[:quantum_count] = count.numerator
+            term_result[:quantum] = quantum.serialize
+          end
+          term_result
         end
         raise Fault.new('E_SPAN_MISMATCH') unless position == length.n
         mapped = boundaries.map do |boundary|

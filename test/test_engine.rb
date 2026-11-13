@@ -118,4 +118,20 @@ class EngineTest < Minitest::Test
     error('E_INEXACT_DIVISION_INPUT', division('sin(pi/2):1'))
     assert_equal [300,300], lengths(division('1:1',600,'positive_intervals',{'unused'=>quantity(1,'Scalar',false)}))
   end
+  def test_repeat_and_exact_grid_do_not_guess_legacy_grammar
+    assert_equal [100]*8, lengths(division('8{1}',800))
+    result = division('20mm:1[32mm]:228mm:96mm')
+    assert_equal [20,256,228,96], lengths(result)
+    assert_equal 8, result[:value][:expanded_terms][1][:quantum_count]
+    error('E_QUANTIZATION_INFEASIBLE', division('20mm:1[32mm]:228mm:96mm',601))
+    error('E_UNSUPPORTED_GRAMMAR', division('n*110mm:1'))
+    error('E_UNSUPPORTED_GRAMMAR', division('#descriptor'))
+    error('E_UNSUPPORTED_GRAMMAR', division('8{1:1}'))
+    error('E_UNSUPPORTED_GRAMMAR', division('8{2{1}}'))
+    error('E_RESOURCE_LIMIT', division('1001{1}'))
+    error('E_UNSUPPORTED_GRAMMAR', division('1[32mm]:1'))
+    error('E_UNSUPPORTED_GRAMMAR', division('2[32mm]:20mm'))
+    error('E_UNSUPPORTED_GRAMMAR', division('1[0mm]:20mm'))
+    error('E_DEGENERATE_INTERVAL', division('1:0:1',600,'reference_points'))
+  end
 end
