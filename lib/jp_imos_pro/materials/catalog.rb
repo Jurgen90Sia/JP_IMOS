@@ -36,10 +36,9 @@ module JPImosPro
         end
         index
       end
-      def verify_references(state:,catalog:,limits: {})
-        result=ProjectCore.boundary(limits) do |budget|
-          owned=Design::Record.validate(state,budget)
-          index=normalize(catalog,budget)
+      # Trusted owned records only. Public boundaries validate and share their
+      # budget before invoking this helper; imported reports never select it.
+      def resolve_owned(owned,index,budget)
           bindings=[]
           owned['construction_requests'].each_with_index do |request,i|
             Construction::Request::ROLES.each do |role|
@@ -68,7 +67,16 @@ module JPImosPro
             'state_sha256'=>Digest::SHA256.hexdigest(ProjectCore::Codec.encode(owned,budget)),
             'catalog_sha256'=>Digest::SHA256.hexdigest(ProjectCore::Codec.encode(normalized,budget)),
             'bindings'=>bindings,'diagnostics'=>[]}
-          ProjectCore::Document.new(budget).deep_freeze(report)
+          validator=ProjectCore::Document.new(budget)
+          validator.deep_freeze(normalized)
+          validator.deep_freeze(report)
+          [normalized,report]
+      end
+      def verify_references(state:,catalog:,limits: {})
+        result=ProjectCore.boundary(limits) do |budget|
+          owned=Design::Record.validate(state,budget)
+          index=normalize(catalog,budget)
+          resolve_owned(owned,index,budget)[1]
         end
         result[:metadata]={schema:'jpimos.material-reference-report/1',profile_version:'jp-user-material-registry-v1'}
         result

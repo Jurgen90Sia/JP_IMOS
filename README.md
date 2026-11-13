@@ -2,7 +2,7 @@
 
 Original parametric furniture construction research for desktop SketchUp 2021–2026, with Albanian/English user-facing language support and millimeters as canonical units.
 
-**Current implementation: Phase 2A parametric engine and Phase 2B project-core and exact zone resolver.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
+**Current implementation: parametric engine, project-core, exact zones, four-panel carcass previews, revision-bound design state and material-bound preparation.** The user authorized development after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md), [material-bound preparation](docs/phase-02e/material-bound-preparation.md) and [native scratch evidence](docs/phase-02e/native-scratch-validation.md).
 
 ## Scope and evidence
 
@@ -19,7 +19,7 @@ The original14 reports are frozen Phase 1B research records. Their historical st
 
 ## Next permitted technical scope
 
-The **Parametric Expression and Linear Division Engine** and **Project-Core Contract** are implemented. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
+The **Parametric Expression and Linear Division Engine** and **Project-Core Contract** are implemented. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction currently covers four rectangular finished-envelope panels. Drawings and production host integration remain future work.
 
 Drilling, CNC, CAM, nesting, toolpaths and machine postprocessors are excluded. No affiliation with proprietary imos software is implied.
 
