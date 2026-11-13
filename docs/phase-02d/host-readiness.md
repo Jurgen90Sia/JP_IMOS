@@ -1,5 +1,13 @@
 # Host integration readiness: BLOCKED dependencies retained
 
+## Current qualification update — 13 November 2026
+
+The historical audit below predates the user-declared material registry and scratch native geometry probe. The current registry verifies UUID/version/category pins without manufacturer claims. `Design::MaterialPreparation.prepare` now rebuilds the design snapshot and resolves all material references atomically under one budget, binding whole state and normalized registry by content hashes; see [contract](../phase-02e/material-bound-preparation.md). This closes the gap between those two pure preparations. It does not provide physical material properties, version publication authority or accepted general PartSpecs.
+
+A user-executed one-shot probe created four grouped panels in an initially empty model in SketchUp 21.0.339 / embedded Ruby 2.7.1. All four native solids passed dimensions, manifold, face orientation and volume checks; the scratch SKP saved. The agent independently read both the evidence JSON/source digest and the live Ruby Console PASS output. Graphical capture timed out twice during reinspection. See [native evidence and limits](../phase-02e/native-scratch-validation.md). Undo, abort recovery, reopen and production canonical persistence remain NOT RUN. The production host/export status therefore remains BLOCKED.
+
+## Historical dependency audit
+
 Date:13 November2026. This is a dependency audit, not a host implementation or host test. It extends the existing architecture/model/support reports08/09/07 using the current code/evidence; no application window/model was opened or modified in this task.
 
 The pure carcass design-state module is independently qualified. Production host application/export remains **BLOCKED** until the contracts below are resolved. A good preview, matching revision or source digest does not independently establish these guarantees.
