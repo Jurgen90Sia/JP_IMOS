@@ -29,7 +29,7 @@ Task1: create `design/physical_state.rb`, `design/physical_record.rb`, `design/p
 - [x] RED: owning codec, coverage, source/material binding, stable resize identities, grain-only and catalog-version revision edits, stale/no-op/exhausted revisions, source rejection, ownership and resource exhaustion.
 - [x] Implement closed authoring and scoped diagnostics; no implicit policies or catalog characteristics.
 - [x] Compose freshly resolved construction/local physical geometry under one budget and bind complete state/catalog hashes.
-- [ ] Run focused/full suites in Ruby2.7.8 and3.2.9, review independently, publish and integrate.
+- [x] Run focused/full suites in Ruby2.7.8 and3.2.9, review independently and publish PR #11 under standing integration authorization.
 
 Review focus: policy-only edits failing to increment; same material pin changing silently; forged frame/derived input accepted as authority; identity reassignment on resize; shared-budget reset while composing parts. All have corresponding tests. Project persistence, acceptance CAS, undo/reopen, host transaction qualification and general banded/nonrectangular parts remain future dependencies.
 
@@ -42,3 +42,7 @@ Task1 RED:10 missing-entry-point errors observed before implementation; first GR
 Aggregate qualification: authoring validates under work16,000; full composition under work48,000 refuses atomically and deterministically; a new request at default limits succeeds. Resource ceilings can refuse larger otherwise-valid projects; count caps are not a throughput guarantee. Standalone native qualification of the local builder remains historical at its recorded source hash; this newly composed owning profile is NOT RUN in SketchUp.
 
 No change in implementation scope or source interpretation was required. No host model dictionary, runtime acceptance pointer, loader, RBZ, export route, third-party implementation or proprietary asset is introduced.
+
+Final review: independent read-only review of `96d7a40..4cd941c` approved merging with no Critical/Important/Minor findings. Reviewer reran both real Ruby2.7.8 and3.2.9 suites (124 tests /1,752 assertions each) and additionally confirmed preparation/re-resolution/codec snapshot identity. No fixes or deferred minors were requested.
+
+Final Ruling: the reviewer did not judge native qualification of this owning profile, host/session acceptance, transaction persistence, undo/reopen or production/manufacturer correctness. These remain explicitly unqualified dependencies. Historical local-builder native geometry evidence is not an endorsement of this composed profile. Treating prepared registry-bound output as an accepted host transaction would violate that boundary.
