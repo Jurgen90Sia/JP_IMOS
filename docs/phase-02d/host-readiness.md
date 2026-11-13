@@ -6,6 +6,8 @@ The historical audit below predates the user-declared material registry and scra
 
 A user-executed one-shot probe created four grouped panels in an initially empty model in SketchUp 21.0.339 / embedded Ruby 2.7.1. All four native solids passed dimensions, manifold, face orientation and volume checks; the scratch SKP saved. The agent independently read both the evidence JSON/source digest and the live Ruby Console PASS output. Graphical capture timed out twice during reinspection. See [native evidence and limits](../phase-02e/native-scratch-validation.md). Undo, abort recovery, reopen and production canonical persistence remain NOT RUN. The production host/export status therefore remains BLOCKED.
 
+Current physical-profile addition: the [local unbanded rectangular builder](../phase-02f/rectangular-physical-part.md) distinguishes exact substrate, finished envelope and dimensional surface solids with explicit local grain/edge policies. This supplies the local representation/arithmetic slice of the PartSpec dependency. It is deliberately not yet bound to an owning authored project revision or registry report, and cannot import its output as authoring. An accepted general/project physical snapshot, authoritative catalog characteristics and model transactions remain unresolved. Existing material-bound preparation does not automatically emit these new physical parts; no new native host qualification is claimed for them.
+
 ## Historical dependency audit
 
 Date:13 November2026. This is a dependency audit, not a host implementation or host test. It extends the existing architecture/model/support reports08/09/07 using the current code/evidence; no application window/model was opened or modified in this task.
