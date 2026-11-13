@@ -1,0 +1,10 @@
+# SDD ledger — plan: docs/phase-01/21-prepared-revisions-implementation-plan.md
+User requested uninterrupted continuation. Base ea15eb59d4f04e3454b60a4ff118eeca0f109fd5, branch feat/prepared-project-revisions.
+Ruling: execute the already approved design's prepared-revision contract without another plan-confirmation interruption — user explicitly said “pa nderprer” — no broader physical/host module is authorized.
+Existing checkout and writable staging work/revisions retained. One fresh-context final review; no per-task implementer delegation.
+Preflight: Document.validate + CoreBudget -> Revision current/replacement comparisons -> shared validated_policy -> existing Zones::Resolver -> complete frozen prepared record. No new budget or host publication inside candidate resolution.
+Tasks:1 conflicts/no-op;2 complete candidate/snapshot;3 limits/review/integration.
+Task1 complete: missing revision module failed first;3 focused tests/45 assertions green on Ruby2.7/3.2. Ruling: helper named semantic_equal? to avoid shadowing Ruby object-identity equal?. Guards/no-op/version comparison share one caller budget.
+Task2 complete: absent public prepare_revision failed first; full54 tests/974 assertions green on Ruby2.7/3.2. Candidate and snapshot revision8 agree; labels/locale/origins and version pins preserved, source failures atomic and scoped to replacement. Policy validation extracted without weakening existing resolver tests.
+Task3 qualification complete:58 tests/1012 assertions green on real Ruby2.7.8 and3.2.9. Shared work/byte limits cover both inputs and comparison/resolution; frozen inputs, maximum-minus-one, policy failures and authored optional presence tested. Fresh-context static review found no concrete actionable issues; Task3 tests subsequently executed on both runtimes.
+Prepared remains pure data: no host acceptance, file/network mutation or global revision publication. The current/replacement pair is locally version-checked, not a global registry. Original14 unchanged. Integration follows the user's uninterrupted instruction, after fresh verification.

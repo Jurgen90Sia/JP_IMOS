@@ -43,6 +43,6 @@ Quantity conversion reuses `Parametric::Value.deserialize` behind one adapter; t
 
 ## Deferred
 
-The subsequent [exact zone resolver](zones.md) now exposes `resolve_zones`, with named frames, partitions, layers, containment and shared work accounting. This first-unit codec still validates authored structure only; expressions/bounds can fail resolution. `prepare_revision` remains deferred until a separate transaction-contract implementation. No accepted host state is implied.
+The subsequent [exact zone resolver](zones.md) now exposes `resolve_zones`, with named frames, partitions, layers, containment and shared work accounting. This first-unit codec still validates authored structure only; expressions/bounds can fail resolution. The [prepared-revision API](revisions.md) now pairs a validated next document with its matching zone snapshot atomically. No accepted host state is implied.
 
 There are no physical panels, thickness deductions, materials/BOM/drawings, SketchUp integration, persistence hooks, UI or RBZ. Source conflicts remain unchanged. No proprietary source manuals, figures, runtime binaries or credentials are included. Distribution licensing remains undecided.

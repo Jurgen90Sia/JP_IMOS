@@ -10,6 +10,7 @@ require_relative 'project_core/references'
 require_relative 'zones/frame'
 require_relative 'zones/engine_bridge'
 require_relative 'zones/resolver'
+require_relative 'project_core/revision'
 
 module JPImosPro
   module ProjectCore
@@ -36,24 +37,43 @@ module JPImosPro
       policy=nil
       result=boundary(limits) do |budget|
         validated=Document.validate(document,budget)
-        begin
-          backend=numeric_policy.instance_of?(Hash) ? numeric_policy[:backend_id] : nil
-          policy_id=numeric_policy.instance_of?(Hash) ? numeric_policy[:policy_id] : nil
-          unless policy_id.instance_of?(String) && backend.instance_of?(String) && backend.valid_encoding? && [Encoding::UTF_8,Encoding::US_ASCII].include?(backend.encoding)
-            raise Parametric::Fault.new('E_INPUT_CONTRACT')
-          end
-          budget.text_bytes(backend.bytesize,'/numeric_policy/backend_id')
-          Parametric.require_policy(numeric_policy)
-        rescue Parametric::Fault
-          raise Fault.new('E_INPUT_CONTRACT','/numeric_policy')
-        end
-        policy={policy_id:numeric_policy[:policy_id].dup,backend_id:numeric_policy[:backend_id].dup}
+        policy=validated_policy(numeric_policy,budget)
         Zones::Resolver.resolve(validated_document:validated,policy:policy,budget:budget)
       end
+      qualify(result,policy)
+    end
+    def validated_policy(numeric_policy,budget)
+      backend=numeric_policy.instance_of?(Hash) ? numeric_policy[:backend_id] : nil
+      policy_id=numeric_policy.instance_of?(Hash) ? numeric_policy[:policy_id] : nil
+      unless policy_id.instance_of?(String) && backend.instance_of?(String) && backend.valid_encoding? && [Encoding::UTF_8,Encoding::US_ASCII].include?(backend.encoding)
+        raise Parametric::Fault.new('E_INPUT_CONTRACT')
+      end
+      budget.text_bytes(backend.bytesize,'/numeric_policy/backend_id')
+      Parametric.require_policy(numeric_policy)
+      {policy_id:policy_id.dup,backend_id:backend.dup}
+    rescue Parametric::Fault
+      raise Fault.new('E_INPUT_CONTRACT','/numeric_policy')
+    end
+    def qualify(result,policy)
       if policy
         result[:metadata]=result[:metadata].merge(policy).merge(algorithm_version:Zones::Resolver::ALGORITHM)
       end
       result
+    end
+    def prepare_revision(current:,replacement:,expected_revision:,numeric_policy:,limits: {})
+      policy=nil
+      result=boundary(limits) do |budget|
+        validated_current=Revision.current(current,expected_revision,budget)
+        validated_replacement=Revision.replacement(validated_current,replacement,budget)
+        policy=validated_policy(numeric_policy,budget)
+        next_revision=validated_current['revision']+1
+        budget.tick('/replacement',validated_replacement.size+6)
+        candidate=validated_replacement.merge('revision'=>next_revision).freeze
+        snapshot=Revision.candidate_snapshot(candidate,policy,budget)
+        {'project_id'=>candidate['project_id'],'base_revision'=>validated_current['revision'],
+          'next_revision'=>next_revision,'document'=>candidate,'zone_snapshot'=>snapshot}.freeze
+      end
+      qualify(result,policy)
     end
   end
 end
