@@ -4,16 +4,7 @@ require_relative '../../lib/jp_imos_pro/design/physical_state'
 require_relative 'fixtures'
 
 class PhysicalStateTest < Minitest::Test
-  include DesignFixtures
-  def physical_state
-    {'schema'=>'jpimos.physical-design/1','design'=>design_state,
-      'catalog'=>{'schema'=>'jpimos.material-catalog/1','entries'=>[
-        {'id'=>uuid(900),'version'=>1,'label'=>'Synthetic panel','category'=>'panel','provenance'=>{'kind'=>'user_declared','note'=>''}}]},
-      'part_policies'=>%w[left right top bottom].each_with_index.map do |role,i|
-        {'id'=>uuid(1000+i),'article_instance_id'=>uuid(4),'role'=>role,
-          'grain'=>{'substrate'=>'u','surfaces'=>[]},'edges'=>%w[u_min u_max v_min v_max].to_h { |edge| [edge,{'kind'=>'none'}] }}
-      end}
-  end
+  include PhysicalDesignFixtures
   def resolve(state=physical_state,limits={})
     JPImosPro::Design::PhysicalState.resolve(state:state,numeric_policy:policy,limits:limits)
   end
