@@ -36,7 +36,7 @@ Review tests must exercise stale revision with a division-by-zero replacement, i
 
 Create lib/jp_imos_pro/project_core/revision.rb; test/project_core/revision_test.rb; docs/phase-02b/revisions.md and revisions-validation.md. Modify project_core.rb to expose the operation and extract validated_policy helper; update current README/API links. Test runner already discovers project_core tests.
 
-Internal Revision.current(document,expected,budget)->validated current, checking expected type/equality and exhaustion; Revision.replacement(current,document,budget)->validated replacement with matching IDs/revision, immutable overlapping definition versions and meaningful change; Revision.candidate_snapshot(candidate,policy,budget)->resolved snapshot with prefixed errors. Revision.equal?(left,right,budget)->Boolean is iterative, counts inspected nodes/queued pairs, compares only owned plain JSON values and ignores Hash key order. No codec JSON serialization is used as a semantic comparison shortcut.
+Internal Revision.current(document,expected,budget)->validated current, checking expected type/equality and exhaustion; Revision.replacement(current,document,budget)->validated replacement with matching IDs/revision, immutable overlapping definition versions and meaningful change; Revision.candidate_snapshot(candidate,policy,budget)->resolved snapshot with prefixed errors. Revision.semantic_equal?(left,right,budget)->Boolean is iterative, counts inspected nodes/queued pairs, compares only owned plain JSON values and ignores Hash key order. No codec JSON serialization is used as a semantic comparison shortcut.
 
 ## Task1: Revision conflict and no-op boundary
 

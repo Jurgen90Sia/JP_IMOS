@@ -121,4 +121,66 @@ class PreparedRevisionTest < Minitest::Test
     error('E_INPUT_CONTRACT',r)
     assert_equal '/replacement/unknown',r[:diagnostics][0][:json_pointer]
   end
+  def test_one_budget_covers_both_validations_comparison_and_resolution
+    current=layers(10)
+    replacement=Marshal.load(Marshal.dump(current))
+    replacement['articles'][0]['parameter_values']['W']=length(800)
+    shared=budget(work:10000)
+    c=C::Revision.current(current,7,shared)
+    assert C::Revision.replacement(c,replacement,shared).frozen?
+    r=prepare(current,replacement,7,{work:10000})
+    error('E_RESOURCE_LIMIT',r)
+    assert r[:diagnostics][0][:json_pointer].start_with?('/replacement')
+    assert_equal r[:diagnostics],prepare(current,replacement,7,{work:10000})[:diagnostics]
+    assert prepare(current,replacement)[:ok]
+    refute current.frozen?
+    refute replacement.frozen?
+    fault('E_RESOURCE_LIMIT') { C::Revision.semantic_equal?(Array.new(100,1),Array.new(100,1),budget(work:10)) }
+  end
+  def test_shared_byte_quota_covers_both_owned_input_copies
+    current=valid_document
+    current['definitions'][0]['source_refs']=[{'requirement_id'=>'a'*1500,'classification'=>'PROPOSED','pdf'=>nil,'page'=>nil,'conflict_id'=>nil}]
+    replacement=Marshal.load(Marshal.dump(current))
+    replacement['locale']='en'
+    assert C.encode_document(document:current,limits:{json_bytes:4096})[:ok]
+    assert C.encode_document(document:replacement,limits:{json_bytes:4096})[:ok]
+    error('E_RESOURCE_LIMIT',prepare(current,replacement,7,{json_bytes:4096}))
+    assert prepare(current,replacement)[:ok]
+  end
+  def test_frozen_inputs_near_maximum_and_authored_presence
+    current=valid_document
+    current['revision']=C::Document::SAFE_INTEGER-1
+    current=C.decode_document(source:C.encode_document(document:current)[:value])[:value]
+    replacement=Marshal.load(Marshal.dump(current))
+    replacement['locale']='en'
+    replacement=C.decode_document(source:C.encode_document(document:replacement)[:value])[:value]
+    r=prepare(current,replacement,current['revision'])
+    assert r[:ok],r[:diagnostics].inspect
+    assert_equal C::Document::SAFE_INTEGER,r[:value]['next_revision']
+    error('E_REVISION_EXHAUSTED',prepare(r[:value]['document'],r[:value]['document'],C::Document::SAFE_INTEGER))
+    current=valid_document
+    current['definitions'][0]['parameters'] << {'name'=>'a','expected_type'=>'Scalar','default_value'=>scalar(0),'required'=>false}
+    replacement=Marshal.load(Marshal.dump(current))
+    replacement['articles'][0]['parameter_values']['a']=scalar(0)
+    r=prepare(current,replacement)
+    assert r[:ok]
+    assert r[:value]['document']['articles'][0]['parameter_values'].key?('a')
+    refute current['articles'][0]['parameter_values'].key?('a')
+  end
+  def test_invalid_policy_and_current_errors_are_structured_and_scoped
+    current=valid_document
+    replacement=valid_document
+    replacement['locale']='en'
+    error('E_INPUT_CONTRACT',prepare(current,replacement,7,{},nil))
+    bad=policy.merge(backend_id:"\xFF".b.force_encoding('UTF-8'))
+    error('E_INPUT_CONTRACT',prepare(current,replacement,7,{},bad))
+    current.delete('locale')
+    r=prepare(current,replacement)
+    error('E_INPUT_CONTRACT',r)
+    assert_equal '/current/locale',r[:diagnostics][0][:json_pointer]
+    current=valid_document
+    replacement=valid_document
+    replacement['definitions'][0]['label']='Changed same version'
+    error('E_DEFINITION_DUPLICATE',prepare(current,replacement))
+  end
 end

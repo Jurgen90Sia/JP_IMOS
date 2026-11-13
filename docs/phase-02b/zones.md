@@ -44,4 +44,4 @@ Run the complete suite using `ruby test/all_test.rb`. Production uses Ruby stdli
 
 ## Deferred scope
 
-`prepare_revision`, accepted host transactions, persistence/undo, physical construction, materials, BOM, drawings, UI and RBZ remain unimplemented. Source conflicts SC01/SC04/SC08/SC15 remain unresolved; explicit authored spans keep them outside automatic construction decisions. No source PDF, figure, extracted manual, runtime binary or external expression implementation is vendored.
+[Pure revision preparation](revisions.md) is now implemented. Accepted host transactions, persistence/undo, physical construction, materials, BOM, drawings, UI and RBZ remain unimplemented. Source conflicts SC01/SC04/SC08/SC15 remain unresolved; explicit authored spans keep them outside automatic construction decisions. No source PDF, figure, extracted manual, runtime binary or external expression implementation is vendored.
