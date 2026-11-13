@@ -73,4 +73,49 @@ class EngineTest < Minitest::Test
     assert_equal 0, number(expression('$a', {'a'=>quantity(0)}))
     error('E_UNKNOWN_SYMBOL', expression('$a'))
   end
+  def division(source, length = 600, context = 'positive_intervals', symbols = {}, origin = 0, direction = 1)
+    parsed = P.parse_division(source: source, grammar_version: 'jp-division-v1')
+    return parsed unless parsed[:ok]
+    P.allocate_division(ast: parsed[:value], reference: {length: quantity(length,'Length'), origin: quantity(origin,'Length'), direction: direction},
+      symbols: symbols, context: context, numeric_policy: POLICY)
+  end
+  def lengths(result)
+    assert result[:ok], result[:diagnostics].inspect
+    result[:value][:expanded_terms].map { |t| n = t[:length][:numeric]; Rational(n[:numerator],n[:denominator]) }
+  end
+  def test_manual_division_fixtures_E01_to_E11_and_affine_lifting
+    cases = [
+      ['1:1',600,'positive_intervals',[300,300]],
+      ['0:1:0',600,'reference_points',[0,600,0]],
+      ['77mm:1:77mm',600,'reference_points',[77,446,77]],
+      ['88mm:1:88mm',600,'reference_points',[88,424,88]],
+      ['20mm:64mm:1:1:1:64mm:35mm',1000,'positive_intervals',[20,64,Rational(817,3),Rational(817,3),Rational(817,3),64,35]],
+      ['20mm:64mm:1:2:1:64mm:35mm',1000,'positive_intervals',[20,64,Rational(817,4),Rational(817,2),Rational(817,4),64,35]],
+      ['-200mm:1:-200mm',1000,'reference_points',[-200,1400,-200]],
+      ['1+100mm:1:1+50mm',600,'positive_intervals',[250,150,200]],
+      ['1:X-100mm',600,'positive_intervals',[100,500]],
+      ['1-100mm:1',600,'positive_intervals',[250,350]],
+      ['2*3:1',700,'positive_intervals',[600,100]],
+      ['2*(1+100mm):1',800,'positive_intervals',[600,200]]]
+    cases.each { |source,l,c,want| assert_equal want, lengths(division(source,l,c)), source }
+    assert_equal [590,10], lengths(division('1:2*($a+$b)mm',600,'positive_intervals',{'a'=>quantity(2),'b'=>quantity(3)}))
+    result = division('1:1',600,'positive_intervals',{},20,-1)
+    assert_equal ['20','-280','-580'], result[:value][:mapped_boundaries].map { |b| b[:position][:numeric][:numerator] }
+    assert_equal ['b1','b2'], division('0:1:0',600,'reference_points')[:value][:internal_points].map { |p| p[:id] }
+  end
+  def test_division_rejects_invalid_geometry_and_nonlinear_formulas
+    [['E_SPAN_MISMATCH','77mm:1:77mm',153],['E_DEGENERATE_INTERVAL','77mm:1:77mm',154],
+     ['E_DEGENERATE_INTERVAL','0:1:0',600],['E_DEGENERATE_INTERVAL','-200mm:1:-200mm',1000],
+     ['E_NEGATIVE_WEIGHT','1:-1',600],['E_SPAN_MISMATCH','100mm:200mm',301],
+     ['E_REFERENCE_SPAN','1:1',0],['E_NONLINEAR_DIVISION','(1+10mm)*(1+10mm):1',600],
+     ['E_NONLINEAR_DIVISION','abs(1+100mm):1',600],['E_UNSUPPORTED_LEGACY_UNIT','8/4mm:1',600]].each do |code,s,l|
+      error(code, division(s,l))
+    end
+    assert_equal [2,598], lengths(division('(8/4)mm:1'))
+    fixed = division('100mm:200mm',300)
+    assert_equal [100,200], lengths(fixed)
+    assert_nil fixed[:value][:ratio_or_null]
+    error('E_INEXACT_DIVISION_INPUT', division('sin(pi/2):1'))
+    assert_equal [300,300], lengths(division('1:1',600,'positive_intervals',{'unused'=>quantity(1,'Scalar',false)}))
+  end
 end

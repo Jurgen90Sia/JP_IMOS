@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'parametric/core'
+require_relative 'parametric/division'
 
 module JPImosPro
   module Parametric

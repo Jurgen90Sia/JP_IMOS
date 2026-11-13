@@ -13,3 +13,4 @@ Tasks: 1 quantities/lexing; 2 parser/functions; 3 definitions; 4 affine allocati
 No SketchUp adapter, UI, RBZ or other plugin code is authorized.
 Task 1: complete — observed missing implementation, then 2 tests/29 assertions green on Ruby 2.7.8. Task 2: complete — observed E_UNKNOWN_FUNCTION for sin, then 3 tests/65 assertions green; lazy branch type validation and explicit Math allowlist.
 Task 3: complete — missing evaluate_definitions failed first; 4 tests/88 assertions green. Iterative lexical topological sort, complete syntactic dependencies, atomic publication, cycle path diagnostics.
+Task 4: complete — missing parse_division failed first; 6 tests/156 assertions green. Exact affine lifting, explicit reference context, stable boundary IDs, frame mapping, negative coefficient versus negative solved interval distinction.
