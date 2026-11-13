@@ -2,7 +2,7 @@
 
 Original parametric furniture construction research for desktop SketchUp 2021–2026, with Albanian/English user-facing language support and millimeters as canonical units.
 
-**Current feature branch: Phase 2A pure parametric engine.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
+**Current implementation: Phase 2A pure parametric engine.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
 
 ## Scope and evidence
 
@@ -19,7 +19,7 @@ The original14 reports are frozen Phase 1B research records. Their historical st
 
 ## Next permitted technical scope
 
-Only the **Parametric Expression and Linear Division Engine** is implemented on this feature branch. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
+Only the **Parametric Expression and Linear Division Engine** is implemented. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
 
 Drilling, CNC, CAM, nesting, toolpaths and machine postprocessors are excluded. No affiliation with proprietary imos software is implied.
 
@@ -31,3 +31,7 @@ No project distribution license has been selected in this phase. MIT/BSD candida
 
 No broader Phase 2 module is authorized. The 14 historical Phase 1B reports are unchanged; their prior authorization/status statements remain dated research records.
 
+
+## Next design under review
+
+[Phase 2B project-core and hierarchical-zone design](docs/phase-01/18-project-zones-spec.md) specifies lossless exact values, pinned definitions, positive partitions, explicit reservation slots, independent layers and prepared revisions. It is a proposed design; no new module is implemented by that document.
