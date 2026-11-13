@@ -42,7 +42,7 @@ Task 1 files: create `lib/jp_imos_pro/physical/rectangular_part.rb`, `test/physi
 - [x] RED: test absent entry point, bare panel, asymmetric/interleaved rational layers, reversed basis, explicit grain/edge coverage, incompatible inputs, caller ownership, hash behavior and resource exhaustion.
 - [x] Implement bounded owned validation and exact finished/substrate/layer geometry; no eval, fallback thickness, imported derived data or catalog authority claim.
 - [x] GREEN: full suite on real Ruby 2.7.8 and 3.2.9, including all101 baseline tests.
-- [ ] Independent read-only branch review, fix substantive findings with regression tests, record evidence and publish/integrate under standing authorization.
+- [x] Independent read-only branch review, record evidence and publish PR #9 under standing authorization. No substantive fixes were requested.
 
 Review focus: absent grain mistaken for none; banded input silently treated as unbanded; near offset applied in global Z rather than part n; interleaved layers advancing the wrong side; imported physical output becoming authoring. Each has a targeted test. Project binding and host qualification remain separate dependencies.
 
@@ -53,3 +53,7 @@ Base main `2257e5e52addc4f666d6fc0c220db055f6c60585`, clean; baseline101 tests /
 Task1 RED: eight test methods reported the missing `Physical` entry point before implementation. First GREEN:8 tests /89 assertions. Added side-panel n=X and aggregate-budget qualification. Final full suite on real Ruby2.7.8 and3.2.9:111 tests /1,607 assertions, no failures/errors/skips. All101 baseline tests retained. At work8,000 the bare part succeeds but the complete three-layer preparation fails without a partial result; fresh default-budget preparation succeeds. No expected-output or schema ruling was needed.
 
 The implementation is original pure Ruby. No new library/runtime dependency, plugin startup code, RBZ, native model persistence, production export, proprietary PDF or figure was added. General banded/profile/sweep parts and project-bound physical acceptance remain unsupported. Native execution of this new module is NOT RUN.
+
+Final review: independent read-only review of `2257e5e..a5fc3a7` found no Critical/Important/Minor findings and approved merging. Reviewer independently reran the complete Ruby3.2.9 suite:111 tests /1,607 assertions, zero failures/errors/skips; Ruby2.7 syntax compatibility inspected. Implementer executed both real standalone runtimes.
+
+Final Ruling: catalog authority, zone/UUID existence and project revision ownership remain outside this local builder. They must be verified by the later owning project profile; accepting arbitrary local output as project/host state would be incorrect. Native persistence/transactions/production acceptance remain NOT RUN. Banded/nonrectangular profiles remain unsupported and the layer order is an explicit JP convention, not an inferred proprietary behavior. No review finding was deferred as minor.
