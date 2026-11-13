@@ -21,7 +21,7 @@ module JPImosPro
           'schema'=>[:enum,[SCHEMA]],'project_id'=>:uuid,'revision'=>:revision,
           'locale'=>[:enum,%w[sq en]],'units'=>[:enum,['mm']],
           'definitions'=>[:array,:definition,:definitions], 'articles'=>[:array,:article,:articles]},'')
-        # Semantic passes are added by the parameter/reference slices.
+        Parameters.validate_all(result,@budget)
         deep_freeze(result)
       end
       def copy(raw)

@@ -5,6 +5,7 @@ require_relative 'project_core/codec'
 require_relative 'parametric'
 require_relative 'project_core/quantities'
 require_relative 'project_core/document'
+require_relative 'project_core/parameters'
 
 module JPImosPro
   module ProjectCore
