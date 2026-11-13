@@ -50,16 +50,16 @@ module JPImosPro
         fail_input = proc { raise Fault.new('E_INPUT_CONTRACT', nil, path) }
         fail_input.call unless h.is_a?(Hash)
         if h[:type] == 'Boolean'
-          fail_input.call unless h.keys.sort == [:type, :value] && [true, false].include?(h[:value])
+          fail_input.call unless Parametric.exact_keys?(h, [:type, :value]) && [true, false].include?(h[:value])
           return new('Boolean', h[:value])
         end
         kind = h[:type]
         keys = kind == 'Length' ? [:numeric, :type, :unit] : [:numeric, :type]
-        fail_input.call unless %w[Scalar Length].include?(kind) && h.keys.sort == keys && (kind != 'Length' || h[:unit] == 'mm')
+        fail_input.call unless %w[Scalar Length].include?(kind) && Parametric.exact_keys?(h, keys) && (kind != 'Length' || h[:unit] == 'mm')
         data = h[:numeric]
-        fail_input.call unless data.is_a?(Hash) && data.keys.sort == [:denominator, :exact, :numerator]
+        fail_input.call unless Parametric.exact_keys?(data, [:denominator, :exact, :numerator])
         a, b = data[:numerator], data[:denominator]
-        fail_input.call unless a.is_a?(String) && b.is_a?(String) && a.length <= 1235 && b.length <= 1235 && /\A-?(0|[1-9][0-9]*)\z/.match?(a) && /\A[1-9][0-9]*\z/.match?(b) && [true, false].include?(data[:exact])
+        fail_input.call unless Parametric.ascii_text?(a) && Parametric.ascii_text?(b) && a.length <= 1235 && b.length <= 1235 && /\A-?(0|[1-9][0-9]*)\z/.match?(a) && /\A[1-9][0-9]*\z/.match?(b) && [true, false].include?(data[:exact])
         r = budget.number(Rational(a.to_i, b.to_i))
         fail_input.call unless r.numerator.to_s == a && r.denominator.to_s == b
         new(kind, r, data[:exact])
@@ -69,7 +69,7 @@ module JPImosPro
     class Parser
       attr_reader :tokens
       def initialize(source, budget)
-        raise Fault.new('E_INPUT_CONTRACT', nil, 'source') unless source.is_a?(String) && source.valid_encoding?
+        raise Fault.new('E_INPUT_CONTRACT', nil, 'source') unless source.is_a?(String) && source.valid_encoding? && [Encoding::UTF_8, Encoding::US_ASCII].include?(source.encoding)
         @source, @budget, @index, @nodes = source, budget, 0, 0
         raise Fault.new('E_RESOURCE_LIMIT') if source.length > budget.limit(:source_chars)
         @tokens = []
@@ -87,6 +87,7 @@ module JPImosPro
             raise Fault.new(code, {start: i, end: i + 1})
           end
           word = m[0]
+          raise Fault.new('E_SYNTAX', {start: i, end: i + word.length}) if %w[NaN Infinity].include?(word)
           raise Fault.new('E_UNSUPPORTED_GRAMMAR', {start: i, end: i + 2}) if tail.start_with?('**')
           if /\A[0-9]/.match?(word)
             raise Fault.new('E_SYNTAX', {start: i, end: i + word.length + 1}) if /\A[0-9]+(?:\.[0-9]+)?[eE][+-]?[0-9]/.match?(tail)
@@ -206,6 +207,10 @@ module JPImosPro
     class Evaluator
       def initialize(env, budget)
         @env, @budget = env, budget
+        @used = []
+      end
+      def dependencies
+        @used.uniq.sort
       end
       def fault(code, tree, ids = [])
         raise Fault.new(code, tree[2], nil, ids)
@@ -286,6 +291,7 @@ module JPImosPro
         when :boolean then Value.new('Boolean', args[0])
         when :symbol
           name = args[0].sub(/\A\$/, '')
+          @used << name unless name == 'pi'
           name == 'pi' ? Value.new('Scalar', Rational(3141592653589793, 10**15), false) : @env.fetch(name)
         when :group then value(args[0])
         when :unit
@@ -299,7 +305,11 @@ module JPImosPro
           operate(op, value(a), value(b), tree)
         when :call
           name, children = args
-          return value(children[value(children[0]).n ? 1 : 2]) if name == 'if'
+          if name == 'if'
+            condition = value(children[0])
+            selected = value(children[condition.n ? 1 : 2])
+            return Value.new(selected.kind, selected.n, selected.exact && condition.exact)
+          end
           values = children.map { |child| value(child) }
           exact = values.all?(&:exact)
           if %w[min max abs].include?(name)
@@ -353,7 +363,7 @@ module JPImosPro
           when '==' then a.n == b.n
           when '!=' then a.n != b.n
           end
-          return Value.new(kind, n)
+          return Value.new(kind, n, a.exact && b.exact)
         end
         n = case op
         when '+' then a.n + b.n

@@ -6,7 +6,9 @@ module JPImosPro
         terms = []
         loop do
           count = 1
+          repeated = false
           if @tokens[@index + 1] && @tokens[@index + 1][0] == '{'
+            repeated = true
             token = take
             syntax('E_UNSUPPORTED_GRAMMAR') unless /\A[1-9][0-9]*\z/.match?(token[0])
             count = token[0].to_i
@@ -20,7 +22,7 @@ module JPImosPro
           end
           quantum = nil
           if peek == '['
-            syntax('E_UNSUPPORTED_GRAMMAR') unless count == 1
+            syntax('E_UNSUPPORTED_GRAMMAR') if repeated
             take
             quantum = unary(0)
             syntax('E_UNSUPPORTED_GRAMMAR') unless quantum[0] == :unit && quantum[1][1][0] == :literal
@@ -117,7 +119,8 @@ module JPImosPro
 
     def allocate_division(ast:, reference:, symbols:, context:, numeric_policy:, limits: {})
       guard(DIVISION, numeric_policy, limits) do |budget|
-        unless ast.is_a?(Hash) && ast.keys.sort == [:grammar_version,:source,:tree].sort && ast[:grammar_version] == DIVISION
+        require_policy(numeric_policy)
+        unless exact_keys?(ast, [:grammar_version,:source,:tree]) && ast[:grammar_version] == DIVISION
           raise Fault.new('E_INPUT_CONTRACT', nil, 'ast')
         end
         terms = DivisionParser.new(ast[:source], budget).parse
@@ -126,7 +129,7 @@ module JPImosPro
           budget.tick(term[:count])
           Array.new(term[:count]) { {tree: term[:tree], count: 1, quantum: term[:quantum]} }
         end
-        unless reference.is_a?(Hash) && reference.keys.sort == [:direction,:length,:origin] && [1,-1].include?(reference[:direction]) && reference[:direction].is_a?(Integer)
+        unless exact_keys?(reference, [:direction,:length,:origin]) && [1,-1].include?(reference[:direction]) && reference[:direction].is_a?(Integer)
           raise Fault.new('E_INPUT_CONTRACT', nil, 'reference')
         end
         unless %w[positive_intervals reference_points].include?(context)
@@ -148,7 +151,7 @@ module JPImosPro
         evaluator = GapEvaluator.new(env, budget)
         dependencies = []
         gaps = terms.map do |term|
-          evaluator.type(term[:tree])
+          term[:resolved_type] = evaluator.type(term[:tree])
           dependencies |= references(term[:tree], budget)
           value = evaluator.value(term[:tree])
           raise Fault.new('E_UNIT_MISMATCH', term[:tree][2]) if value.kind == 'Boolean'
@@ -162,7 +165,7 @@ module JPImosPro
         unless quantized.empty?
           raise Fault.new('E_UNSUPPORTED_GRAMMAR') unless quantized.size == 1
           qi = quantized.first
-          unless gaps[qi].weight == 1 && gaps[qi].fixed.zero? && gaps.each_with_index.all? { |gap,i| i == qi || gap.weight.zero? }
+          unless gaps[qi].weight == 1 && gaps[qi].fixed.zero? && gaps.each_with_index.all? { |gap,i| i == qi || (gap.weight.zero? && terms[i][:resolved_type] == 'Length') }
             raise Fault.new('E_UNSUPPORTED_GRAMMAR')
           end
           evaluator.type(terms[qi][:quantum])

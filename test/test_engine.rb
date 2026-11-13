@@ -134,4 +134,107 @@ class EngineTest < Minitest::Test
     error('E_UNSUPPORTED_GRAMMAR', division('1[0mm]:20mm'))
     error('E_DEGENERATE_INTERVAL', division('1:0:1',600,'reference_points'))
   end
+  def test_malformed_contracts_never_escape_as_native_exceptions
+    [nil, 1, {}, {type:'Scalar', numeric:{numerator:'1',denominator:'0',exact:true}},
+      {type:'Scalar', numeric:{numerator:'2',denominator:'2',exact:true}},
+      {type:'Scalar', numeric:{numerator:'1',denominator:'1',exact:0}},
+      {type:'Scalar','numeric'=>{}}, {type:'Boolean',value:1}].each do |bad|
+      result = expression('a', {'a'=>bad})
+      error('E_INPUT_CONTRACT', result)
+      assert_nil result[:diagnostics][0][:source_span]
+      refute_nil result[:diagnostics][0][:input_path]
+    end
+    error('E_INPUT_CONTRACT', P.parse_expression(source: 1,grammar_version:'jp-core-v1'))
+    error('E_INPUT_CONTRACT', P.parse_expression(source:'1',grammar_version:'jp-core-v1',limits:{'depth'=>2}))
+    error('E_INPUT_CONTRACT', P.evaluate_expression(ast:{grammar_version:'jp-core-v1','tree'=>[]},symbols:{},numeric_policy:POLICY))
+    error('E_INPUT_CONTRACT', expression('1',{'a'=>quantity(1).merge('other'=>0)}))
+    parsed = P.parse_expression(source:'1',grammar_version:'jp-core-v1')[:value]
+    assert parsed.frozen?
+    assert parsed[:tree].frozen?
+    forged = parsed.merge(tree: [:literal,['999','1'],{start:0,end:1}])
+    error('E_INPUT_CONTRACT', P.evaluate_expression(ast:forged,symbols:{},numeric_policy:POLICY))
+  end
+  def test_each_resource_limit_can_be_tightened_but_not_enlarged
+    [['1+2',{tokens:2}],['1+2',{ast_nodes:2}],['123',{literal_digits:2}],
+     ['1+2',{steps:2}],['((1))',{depth:1}]].each do |source,limits|
+      error('E_RESOURCE_LIMIT',P.parse_expression(source:source,grammar_version:'jp-core-v1',limits:limits))
+    end
+    error('E_INPUT_CONTRACT', P.parse_expression(source:'1',grammar_version:'jp-core-v1',limits:{depth:33}))
+    error('E_RESOURCE_LIMIT',P.parse_expression(source:'1'*257,grammar_version:'jp-core-v1'))
+    result = P.parse_expression(source:'255*255',grammar_version:'jp-core-v1')
+    error('E_RESOURCE_LIMIT',P.evaluate_expression(ast:result[:value],symbols:{},numeric_policy:POLICY,limits:{numeric_bits:8}))
+    error('E_RESOURCE_LIMIT',P.parse_division(source:'1:1:1',grammar_version:'jp-division-v1',limits:{expanded_segments:2}))
+    error('E_RESOURCE_LIMIT',P.evaluate_definitions(definitions:{'a'=>{source:'1',expected_type:'Scalar'},'b'=>{source:'2',expected_type:'Scalar'}},inputs:{},numeric_policy:POLICY,limits:{definitions:1}))
+  end
+  def test_remaining_negative_and_boundary_contracts
+    %w[NaN Infinity].each { |s| error('E_SYNTAX', expression(s)) }
+    ['`whoami`','Kernel.system(1)','1;2','a=1',"'x'"].each do |s|
+      result = expression(s)
+      refute result[:ok]
+      assert_includes ['E_FORBIDDEN_TOKEN','E_SYNTAX'],result[:diagnostics][0][:code]
+    end
+    error('E_UNIT_MISMATCH',expression('(1mm)cm'))
+    error('E_UNKNOWN_UNIT',expression('1inch'))
+    error('E_DOMAIN',expression('1%0'))
+    error('E_FUNCTION_DOMAIN',expression('sin(1000001)'))
+    error('E_INEXACT_DIVISION_INPUT',division('$a:1',600,'positive_intervals',{'a'=>quantity(1,'Scalar',false)}))
+    assert_equal [192,408],lengths(division('$n*96mm:1',600,'positive_intervals',{'n'=>quantity(2)}))
+    assert_equal [300,300],lengths(division('1:Y',600,'positive_intervals',{'Y'=>quantity(300,'Length')}))
+    error('E_UNKNOWN_SYMBOL',division('1:Y'))
+    result = expression('if(true,a,b)',{'a'=>quantity(1),'b'=>quantity(2)})
+    assert_equal ['a'],result[:dependencies]
+    assert_equal ['a','b'],result[:declared_dependencies]
+    parsed = P.parse_division(source:'1:1',grammar_version:'jp-division-v1')[:value]
+    [[:length,quantity(600,'Length',false)],[:origin,quantity(0,'Length',false)]].each do |key,bad|
+      ref = {length:quantity(600,'Length'),origin:quantity(0,'Length'),direction:1}.merge(key=>bad)
+      error('E_INEXACT_DIVISION_INPUT',P.allocate_division(ast:parsed,reference:ref,symbols:{},context:'positive_intervals',numeric_policy:POLICY))
+    end
+  end
+  def test_review_regressions_encoding_policy_and_reserved_functions
+    error('E_INPUT_CONTRACT',P.parse_expression(source:'1'.encode('UTF-16LE'),grammar_version:'jp-core-v1'))
+    ast = P.parse_expression(source:'1',grammar_version:'jp-core-v1')[:value]
+    [nil,false,{}, {policy_id:POLICY[:policy_id],backend_id:''}].each do |policy|
+      error('E_INPUT_CONTRACT',P.evaluate_expression(ast:ast,symbols:{},numeric_policy:policy))
+    end
+    error('E_RESERVED_SYMBOL',definitions({'sin'=>{source:'1',expected_type:'Scalar'}}))
+    error('E_RESERVED_SYMBOL',expression('1',{'max'=>quantity(1)}))
+    defs = {}
+    100.times { |i| defs["v#{i}"] = {source:'1',expected_type:'Scalar'} }
+    result = definitions(defs)
+    assert result[:ok],result.inspect
+    assert_equal 100,result[:value][:symbols].size
+  end
+  def test_exactness_is_not_recovered_through_a_condition_or_unused_branch
+    result = expression('if(sin(pi/2)==1,1,2)')
+    assert result[:ok],result.inspect
+    refute result[:value][:numeric][:exact]
+    error('E_INEXACT_DIVISION_INPUT',division('if(sin(pi/2)==1,1,2):1'))
+    error('E_UNSUPPORTED_GRAMMAR',division('1{1}[32mm]:24mm',600))
+    error('E_UNSUPPORTED_GRAMMAR',division('0:1[32mm]:24mm',600,'reference_points'))
+  end
+  def test_page_referenced_coordinates_and_resource_boundaries
+    result = division('20mm:64mm:1:1:1:64mm:35mm',1000)
+    assert_equal [20,84,Rational(1069,3),Rational(1886,3),901,965], result[:value][:internal_points].map { |p| n=p[:position][:numeric]; Rational(n[:numerator],n[:denominator]) }
+    result = division('-200mm:1:-200mm',1000,'reference_points')
+    assert_equal ['-200','1200'], result[:value][:internal_points].map { |p| p[:position][:numeric][:numerator] }
+    assert_equal [1]*1000,lengths(division('1000{1}',1000))
+    assert_equal 4096,P.parse_expression(source:' '*4095+'1',grammar_version:'jp-core-v1')[:value][:source].length
+    assert_equal 1,number(expression('('*32+'1'+')'*32))
+    error('E_RESOURCE_LIMIT',expression('1+'*600+'1'))
+    result = expression("1+\u{1F9B5}")
+    assert_equal({start:2,end:3},result[:diagnostics][0][:source_span])
+    defs = {}
+    1000.times { |i| defs["a#{i}"] = {source:'1',expected_type:'Scalar'} }
+    result = definitions(defs)
+    assert result[:ok],result.inspect
+    assert_equal 1000,result[:value][:symbols].size
+    defs = {'a'=>{source:'b',expected_type:'Scalar'},'b'=>{source:'c',expected_type:'Scalar'},'c'=>{source:'b',expected_type:'Scalar'}}
+    assert_equal ['b','c','b'],definitions(defs)[:diagnostics][0][:details][:cycle]
+  end
+  def test_encoded_contract_fields_return_diagnostics
+    error('E_INPUT_CONTRACT',expression('1',{'a'.encode('UTF-16LE')=>quantity(1)}))
+    bad = quantity(1)
+    bad[:numeric][:numerator] = '1'.encode('UTF-16LE')
+    error('E_INPUT_CONTRACT',expression('a',{'a'=>bad}))
+  end
 end

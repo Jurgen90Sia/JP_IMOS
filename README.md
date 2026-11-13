@@ -2,7 +2,7 @@
 
 Original parametric furniture construction research for desktop SketchUp 2021–2026, with Albanian/English user-facing language support and millimeters as canonical units.
 
-**Current repository content:documentation only.** No installable extension, RBZ or production engine exists. Phase 2 implementation has not been authorized.
+**Current feature branch: Phase 2A pure parametric engine.** The user authorized the first module after Phase 1C. There is no installable extension or RBZ. See [engine API and tests](docs/phase-02a/README.md) and [qualification](docs/phase-02a/validation.md).
 
 ## Scope and evidence
 
@@ -19,7 +19,7 @@ The original14 reports are frozen Phase 1B research records. Their historical st
 
 ## Next permitted technical scope
 
-Only the **Parametric Expression and Linear Division Engine** is specified for a possible first implementation. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. Specification readiness is not full imos compatibility and is not approval to write code.
+Only the **Parametric Expression and Linear Division Engine** is implemented on this feature branch. Its JP grammar has explicit types, reference contexts, limits and unsupported historical cases. This is an original supported subset; construction, drawings and host integration remain future work.
 
 Drilling, CNC, CAM, nesting, toolpaths and machine postprocessors are excluded. No affiliation with proprietary imos software is implied.
 
@@ -29,5 +29,5 @@ Source PDFs, extracted text, rendered figures, credentials and generated artifac
 
 No project distribution license has been selected in this phase. MIT/BSD candidate terms do not license this repository automatically; GPL or unlicensed candidate code is not incorporated. See [license audit](docs/phase-01/06-license-audit.md).
 
-Do not begin Phase 2 without explicit user authorization.
+No broader Phase 2 module is authorized. The 14 historical Phase 1B reports are unchanged; their prior authorization/status statements remain dated research records.
 

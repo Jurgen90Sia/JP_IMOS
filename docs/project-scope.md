@@ -16,3 +16,5 @@ Phase 1B evidence remains PARTIAL where a historical source conflicts or lacks a
 
 **Phase 2 has not started. Explicit authorization is required before any engine implementation.**
 
+
+Phase 2A authorization update (13 November 2026): the user approved implementing only the pure Parametric Expression and Linear Division Engine. This feature branch contains that tested module; earlier baseline-status paragraphs above describe the historical documentation baseline. See phase-02a/README.md and phase-02a/validation.md. No downstream module, SketchUp extension, RBZ or resolution of source conflicts is implied.
