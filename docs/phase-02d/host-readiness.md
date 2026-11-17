@@ -1,6 +1,6 @@
 # Host integration readiness: BLOCKED dependencies retained
 
-## Current qualification update — 13 November 2026
+## Current qualification and design status — 17 November 2026
 
 The historical audit below predates the user-declared material registry and scratch native geometry probe. The current registry verifies UUID/version/category pins without manufacturer claims. `Design::MaterialPreparation.prepare` now rebuilds the design snapshot and resolves all material references atomically under one budget, binding whole state and normalized registry by content hashes; see [contract](../phase-02e/material-bound-preparation.md). This closes the gap between those two pure preparations. It does not provide physical material properties, version publication authority or accepted general PartSpecs.
 
@@ -13,6 +13,8 @@ Revision-owned physical-data update: [Physical Design State](../phase-02g/physic
 Source persistence format update: [Physical Checkpoint](../phase-02h/physical-checkpoint.md) now encodes authoring with project/revision/state/catalog/snapshot consistency checks and explicit numeric backend binding. Decode always rebuilds successful output from source; no geometry cache becomes authority. This closes the pure payload/verification slice. Production model dictionary ownership, accepted/session compare-and-swap, native geometry+persistence transactions, undo/recovery and backend migration remain unresolved and NOT RUN.
 
 Native draft checkpoint update: [the controlled dictionary probe](../phase-02h/native-checkpoint-validation.md) passed source encode/decode, SKP save and actual switch-away/reopen on SketchUp21.0.339/Ruby2.7.1. Stored bytes and rebuilt revision8/four-part snapshot were identical; existing scratch geometry was preserved. This uses a probe-only dictionary and a separate draft source, not a production accepted mapping. Production namespace/CAS, atomic geometry+source replacement, undo/redo, abort recovery and application restart remain unqualified.
+
+Design update17 November2026: the [atomic host contract](../phase-02i/atomic-host-contract.md) and [implementation plan](../phase-02i/atomic-host-implementation-plan.md) now specify experimental namespace/ownership, source-derived world projection, per-Model-incarnation authority, synchronous controlled-action invalidation, CAS, verified rollback and indeterminate quarantine/recovery. SDK operation-state limits restrict the first mutation profile to controlled scratch models. Task1 now implements pure exact world projection and same-resolution checkpoint reuse, with [standalone validation](../phase-02i/projection-validation.md). The host document, shared authority, controller and native transactions remain unimplemented/unqualified. Production readiness remains BLOCKED.
 
 ## Historical dependency audit
 

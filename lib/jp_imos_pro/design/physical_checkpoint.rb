@@ -17,20 +17,43 @@ module JPImosPro
       def fresh(state,policy,budget)
         owned,report=PhysicalRecord.validate(state,budget)
         snapshot=PhysicalSnapshot.build(owned,report,policy,budget)
+        [owned,snapshot,resolution_verification(snapshot,policy,budget)]
+      end
+      def resolution_verification(snapshot,policy,budget)
         verification={'project_id'=>snapshot['project_id'],'revision'=>snapshot['source_revision'],
           'state_sha256'=>snapshot['state_sha256'],'catalog_sha256'=>snapshot['catalog_sha256'],
           'snapshot_sha256'=>snapshot['content_sha256'],'policy_id'=>policy[:policy_id].dup,'backend_id'=>policy[:backend_id].dup}
         ProjectCore::Document.new(budget).deep_freeze(verification)
-        [owned,snapshot,verification]
+        verification
+      end
+      # Trusted composition only: source and snapshot were rebuilt together by
+      # this core. Header checks catch accidental mixing, not hostile snapshots.
+      # Public wire entry points always validate/rebuild source through fresh.
+      def record_from_owned_resolution(state:,snapshot:,numeric_policy:,budget:)
+        project=state['design']['project']
+        expected={'project_id'=>project['project_id'],'source_revision'=>project['revision'],
+          'state_sha256'=>PhysicalSnapshot.digest(state,budget)}
+        expected.each do |key,value|
+          budget.tick('/snapshot/'+key)
+          raise ProjectCore::Fault.new('E_CHECKPOINT_MISMATCH','/snapshot/'+key) unless snapshot[key]==value
+        end
+        %w[policy_id backend_id].each do |key|
+          budget.tick('/snapshot/design_snapshot/'+key)
+          unless snapshot['design_snapshot'][key]==numeric_policy[key.to_sym]
+            raise ProjectCore::Fault.new('E_NUMERIC_POLICY_CONFLICT','/snapshot/design_snapshot/'+key)
+          end
+        end
+        verification=resolution_verification(snapshot,numeric_policy,budget)
+        validator=ProjectCore::Document.new(budget)
+        payload=validator.copy({'schema'=>SCHEMA.dup,'state'=>state,'verification'=>verification})
+        checksum=Digest::SHA256.hexdigest(ProjectCore::Codec.encode(payload,budget))
+        validator.deep_freeze(validator.copy(payload.merge('content_sha256'=>checksum)))
       end
       def encode(state:,numeric_policy:,limits: {})
         boundary(limits) do |budget|
           policy=ProjectCore.validated_policy(numeric_policy,budget)
-          owned,_,verification=fresh(state,policy,budget)
-          validator=ProjectCore::Document.new(budget)
-          payload=validator.copy({'schema'=>SCHEMA.dup,'state'=>owned,'verification'=>verification})
-          checksum=Digest::SHA256.hexdigest(ProjectCore::Codec.encode(payload,budget))
-          output=validator.copy(payload.merge('content_sha256'=>checksum))
+          owned,snapshot,_=fresh(state,policy,budget)
+          output=record_from_owned_resolution(state:owned,snapshot:snapshot,numeric_policy:policy,budget:budget)
           ProjectCore::Codec.encode(output,budget)
         end
       end
