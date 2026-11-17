@@ -14,7 +14,7 @@ module JPImosPro
       include Opaque
       attr_reader :model,:nonce
       def initialize(model)
-        @model,@nonce=model,SecureRandom.uuid.freeze
+        @model,@nonce=model,Registry.nonce
         freeze
       end
       private_class_method :new
@@ -57,7 +57,7 @@ module JPImosPro
         @contexts={}.compare_by_identity
         @leases={}.compare_by_identity
         @candidates={}.compare_by_identity
-        @sequence=0;@epoch=SecureRandom.uuid.freeze
+        @sequence=0;@epoch=Registry.nonce
         @busy=false;@revoked=false;@quarantined=false;@settled=false
       end
       private_class_method :new
@@ -122,8 +122,11 @@ module JPImosPro
         advance;@settled=false;@grant=nil
       end
       def quarantine!
-        check_live
-        advance;@epoch=SecureRandom.uuid.freeze
+        # Late callbacks on a revoked incarnation can still quarantine it.
+        check_thread
+        # Sequence/identity-table revocation is sufficient here. Quarantining
+        # must not depend on an entropy provider that may itself have failed.
+        advance
         @quarantined=true;@settled=false;@grant=nil
       end
       alias notify_external! quarantine!
@@ -148,7 +151,7 @@ module JPImosPro
       def publish_lease(context,ticket,raw,document,projection,inspection,policy,recovery)
         check_ticket(ticket)
         if recovery
-          @epoch=SecureRandom.uuid.freeze
+          @epoch=Registry.nonce
           @quarantined=false
         end
         lease=Lease.send(:new,self,context,@epoch,@sequence,raw,document,projection,inspection,policy,@quarantined)
@@ -186,11 +189,30 @@ module JPImosPro
         @candidates[candidate]=true
         candidate
       end
+      def check_idle_context(context)
+        validate_context(context)
+        unless @settled && @grant && port_call { context.port.controlled_grant.equal?(@grant) }
+          fault('E_HOST_QUIESCENCE_UNPROVEN')
+        end
+      end
+      def publish_application(context,candidate,raw,document,inspection)
+        validate_context(context)
+        fault unless @candidates.key?(candidate) && @candidates[candidate]
+        validate_lease(candidate.base_lease,mutation:true)
+        advance
+        @epoch=Registry.nonce
+        publish_lease(context,[@epoch,@sequence],raw,document,candidate.projection,inspection,candidate.policy,false)
+      end
     end
 
     module Registry
       @models={}.compare_by_identity
       module_function
+      def nonce
+        SecureRandom.uuid.freeze
+      rescue StandardError
+        raise ProjectCore::Fault.new('E_HOST_CONTEXT_UNSUPPORTED','/host/randomness')
+      end
       # Trusted model lifecycle entry points. Only the native harness may claim
       # open/close/settled transitions; arbitrary callers are not isolated.
       def open(model:)
