@@ -18,3 +18,11 @@ Phase 1B evidence remains PARTIAL where a historical source conflicts or lacks a
 
 
 Phase 2A authorization update (13 November 2026): the user approved implementing only the pure Parametric Expression and Linear Division Engine. This feature branch contains that tested module; earlier baseline-status paragraphs above describe the historical documentation baseline. See phase-02a/README.md and phase-02a/validation.md. No downstream module, SketchUp extension, RBZ or resolution of source conflicts is implied.
+
+## Current direction — 17 November2026
+
+The user's subsequent standing authorization covers continuing implementation, verification and integration without repeated approval. The requested product goal is a complete parametric module-creation workflow comparable in usefulness to imos. This is a target, not a measured compatibility percentage or an expansion into the excluded machine-processing functions. Historical baseline authorization paragraphs above remain records of their date.
+
+Current code covers the expression/division core, exact authored zones, supported four-panel carcass construction, declared materials, revision-owned unbanded rectangular physical parts, checkpoints, world projection and the experimental host-document codec. Actual source/geometry atomic application remains the next dependency chain, defined by the [host plan](phase-02i/atomic-host-implementation-plan.md).
+
+Product acceptance must ultimately demonstrate a user creating, resizing, subdividing, saving/reopening and reusing furniture modules in SketchUp, with supported backs/grooves, fronts/drawers, materials/edges and derived reports/drawings where each feature's contract is qualified. These remain the existing roadmap's work, not features delivered by the codec. Historical source conflicts, manufacturer-specific profiles and unqualified host behavior remain explicit gaps; no unsupported imos rule is silently guessed. Progress is reported by independently tested behavior, not a claim of100% equivalence.

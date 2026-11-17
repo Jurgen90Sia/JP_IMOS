@@ -77,29 +77,35 @@ module JPImosPro
       def decode(source:,numeric_policy:,limits: {})
         boundary(limits) do |budget|
           data=ProjectCore::Codec.parse(source,budget)
-          if data.instance_of?(Hash) && data.key?('schema') && data['schema']!=SCHEMA
-            raise ProjectCore::Fault.new('E_SCHEMA_UNSUPPORTED','/schema')
-          end
-          Materials::Context.keys(data,%w[schema state verification content_sha256],'')
-          sha(data['content_sha256'],'/content_sha256')
-          stored=verification_format(data['verification'],budget)
-          policy=ProjectCore.validated_policy(numeric_policy,budget)
-          unless stored==policy
-            raise ProjectCore::Fault.new('E_NUMERIC_POLICY_CONFLICT','/verification')
-          end
-          body=data.reject { |key,_| key=='content_sha256' }
-          unless PhysicalSnapshot.digest(body,budget)==data['content_sha256']
-            raise ProjectCore::Fault.new('E_CHECKPOINT_INTEGRITY','/content_sha256')
-          end
-          state,snapshot,expected=fresh(data['state'],policy,budget)
-          FIELDS.each do |key|
-            budget.tick('/verification/'+key)
-            unless expected[key]==data['verification'][key]
-              raise ProjectCore::Fault.new('E_CHECKPOINT_MISMATCH','/verification/'+key)
-            end
-          end
-          {'state'=>state,'snapshot'=>snapshot,'verification'=>expected,'content_sha256'=>data['content_sha256'].freeze}.freeze
+          rebuild_owned_record(record:data,numeric_policy:numeric_policy,budget:budget)
         end
+      end
+      # Internal object path: caller owns a bounded parsed plain-data record.
+      # All schema, integrity, backend and rebuilt verification checks remain.
+      def rebuild_owned_record(record:,numeric_policy:,budget:)
+        data=record
+        if data.instance_of?(Hash) && data.key?('schema') && data['schema']!=SCHEMA
+          raise ProjectCore::Fault.new('E_SCHEMA_UNSUPPORTED','/schema')
+        end
+        Materials::Context.keys(data,%w[schema state verification content_sha256],'')
+        sha(data['content_sha256'],'/content_sha256')
+        stored=verification_format(data['verification'],budget)
+        policy=ProjectCore.validated_policy(numeric_policy,budget)
+        unless stored==policy
+          raise ProjectCore::Fault.new('E_NUMERIC_POLICY_CONFLICT','/verification')
+        end
+        body=data.reject { |key,_| key=='content_sha256' }
+        unless PhysicalSnapshot.digest(body,budget)==data['content_sha256']
+          raise ProjectCore::Fault.new('E_CHECKPOINT_INTEGRITY','/content_sha256')
+        end
+        state,snapshot,expected=fresh(data['state'],policy,budget)
+        FIELDS.each do |key|
+          budget.tick('/verification/'+key)
+          unless expected[key]==data['verification'][key]
+            raise ProjectCore::Fault.new('E_CHECKPOINT_MISMATCH','/verification/'+key)
+          end
+        end
+        {'state'=>state,'snapshot'=>snapshot,'verification'=>expected,'content_sha256'=>data['content_sha256'].freeze}.freeze
       end
     end
   end
