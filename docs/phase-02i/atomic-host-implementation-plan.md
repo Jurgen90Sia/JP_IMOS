@@ -1,6 +1,6 @@
 # Atomic host application implementation plan
 
-> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–2 are implemented with standalone validation; Tasks3–6 remain planned and unqualified.
+> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–3 are implemented with standalone validation; Tasks4–6 remain planned and unqualified.
 
 **Goal:** apply one declared unbanded rectangular project and its source in one controlled native operation, then prove rollback/undo/reopen consistency.
 
@@ -62,12 +62,12 @@ Interfaces: exactly Reader/Preparation/Recovery from spec§5. Registry.attach on
 
 Read-port contract: `anchor`, `controlled_grant`, `document_json`, `edit_path_open?`, `inspect_empty(budget:)` and `inspect_projection(plan:, root_id:, manifest:, budget:, staging:nil)`. Inspections return private observed handles/mapping only after tree/geometry validation. Every enumerated entity is charged. The test port uses a real owned tree and independent inspection rules, not just a mocked success boolean.
 
-- [ ] Write H-S01..H-S09 first: two attachments share identity/guard/counter; second read invalidates first lease; cross-model/clone/unregistered-copy lease refusal; manual root move, wrong face/quad and foreign child fail; copied root/orphan tags fail; stale PID hint recovers in RAM without writes; accepted empty differs from no document; source imported snapshot/frame injection fails.
-- [ ] Add H-S10 ABA: gateway invalidates synchronously before undo/redo, even if raw bytes return to the original value; old candidate remains rejected. Delayed notification alone is not the test mechanism.
-- [ ] Add H-S11 recovery: indeterminate flag survives attach/read; only fresh controlled grant + complete valid source/tree inspection rotates shared epoch and enables writes. A failed inspection leaves quarantine; no recovery mutation is made.
-- [ ] Run focused tests; Expected: RED for the missing authorities/read APIs.
-- [ ] Implement per-model-incarnation authority, leases and candidates. Known native action dispatch invalidates before action; callbacks only add invalidation. Ordinary reads in quarantine return read-only leases; E_HOST_RECOVERY_REQUIRED guards preparation/application.
-- [ ] Run full suites on both runtimes, including invalid source/resources. Commit. No native compatibility claim yet.
+- [x] Write H-S01..H-S09: two attachments share identity/guard/counter; second read invalidates first lease; cross-model/clone/unregistered-copy lease refusal; manual root move, wrong face/quad and foreign child fail; copied root/orphan tags fail; stale PID hint recovers in RAM without writes; accepted empty differs from no document; source imported snapshot/frame injection fails.
+- [x] Add H-S10 ABA: gateway primitive invalidates synchronously before identical-byte restoration; old candidate remains rejected. Delayed notification alone is not the test mechanism. Native action wiring remains Task5.
+- [x] Add H-S11 recovery: indeterminate quarantine survives attach/read; only fresh controlled grant + complete valid source/tree inspection rotates shared epoch and enables preparation. Failed inspection preserves quarantine and does not repair.
+- [x] Run focused tests; missing authority entry-point assertion failed before implementation.
+- [x] Implement per-model-incarnation authority, leases and candidates; controlled lifecycle primitives and one-use settled grants; quarantine makes ordinary reads read-only and preparation returns E_HOST_RECOVERY_REQUIRED. Application remains Task4.
+- [x] Run full suites on both runtimes, including invalid source/resources. See [session validation](session-validation.md). No native compatibility claim.
 
 ## Task4 — transaction controller against a conformance port
 
@@ -108,4 +108,4 @@ Files: maintain qualification evidence outside Git; create original analysis in 
 
 ## Plan audit and current status
 
-Tasks1–2 are pure source/projection contracts;3–4 prove controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–2 are implemented and standalone tested. Tasks3–6 remain pending; this does not qualify native atomic application.
+Tasks1–2 are pure source/projection contracts;3–4 prove session/controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–3 are implemented and standalone tested. Tasks4–6 remain pending; this does not qualify native atomic application.

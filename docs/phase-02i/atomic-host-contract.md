@@ -64,7 +64,7 @@ Independent translated fixture: article origin[100,200,300], W600/D560/H720 and1
 
 ## 5. Lease, preparation and stale-state protection
 
-Proposed public operations return the existing Result pattern; all names in this section are specifications, not implemented APIs:
+Public operations return the existing Result pattern. Task3 implements Reader/Preparation/Recovery against trusted ports with synthetic standalone tests; see [session validation](session-validation.md). Application and actual native wiring/qualification remain planned:
 
 | API | Input / success |
 |---|---|
