@@ -35,6 +35,10 @@ module JPImosPro
       end
       # Trusted same-request projection only; native ownership is not checked.
       def encode_owned(projection:,root_id:,acceptance_id:,manifest:,budget:)
+        record=record_owned(projection:projection,root_id:root_id,acceptance_id:acceptance_id,manifest:manifest,budget:budget)
+        ProjectCore::Codec.encode(record,budget)
+      end
+      def record_owned(projection:,root_id:,acceptance_id:,manifest:,budget:)
         validator=ProjectCore::Document.new(budget)
         body=validator.copy({'schema'=>SCHEMA.dup,'scope'=>SCOPE.dup,'profile'=>Projection::PROFILE.dup,
           'project_id'=>projection.plan['project_id'],'root_id'=>root_id,'acceptance_id'=>acceptance_id,
@@ -44,7 +48,7 @@ module JPImosPro
         validate_identity(body,projection)
         checksum=Design::PhysicalSnapshot.digest(body,budget)
         output=validator.copy(body.merge('content_sha256'=>checksum))
-        ProjectCore::Codec.encode(output,budget)
+        validator.deep_freeze(output)
       end
       def decode(source:,numeric_policy:,limits: {})
         boundary(limits) { |budget| decode_with_budget(source:source,numeric_policy:numeric_policy,budget:budget) }

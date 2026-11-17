@@ -1,6 +1,6 @@
 # Atomic host application implementation plan
 
-> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–3 are implemented with standalone validation; Tasks4–6 remain planned and unqualified.
+> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–4 are implemented with standalone/synthetic validation; Tasks5–6 remain planned and unqualified.
 
 **Goal:** apply one declared unbanded rectangular project and its source in one controlled native operation, then prove rollback/undo/reopen consistency.
 
@@ -77,12 +77,12 @@ Interface: `Host::Application.apply(context:, candidate:, limits:{}) -> Result<v
 
 The conformance port retains before/after source and trees and supports explicit stage/attribute/erase/commit/abort fault injection. Assertions inspect complete resulting source/tree and unrelated sentinel data, not merely method call counts.
 
-- [ ] Write H-A01 initial application, H-A02 width600→800 and grain edit preparing revision7→8 with stable logical part IDs; metadata and geometry move together; unrelated sentinel and probe dictionary unchanged.
-- [ ] Write H-A03 failures after first solid, before/after old-root removal and during source write: verified abort restores original source/tree exactly, value=nil and mutation_state=rolled_back.
-- [ ] Write H-A04 reentrant apply and document change after begin: reject/abort without publishing new lease; candidate replay remains rejected.
-- [ ] Write H-A05 commit false/exception, abort failure and post-commit observer mutation: mutation_state=unknown, quarantine retained, no automatic undo/repair.
-- [ ] Write H-A06 nonempty→empty→nonempty: no empty Group dependency, stable project ID/revisions, new root UUID after an empty state. H-A07 capped visits during staging attempts one abort; if remaining capacity cannot verify restoration, return unknown/quarantine with E_RESOURCE_LIMIT cause. No counter reset or unconditional rolled_back assertion.
-- [ ] Run focused tests; Expected: missing controller RED. Implement main-thread/guard/CAS and single-use candidate protocol, then full dual-runtime suites. Commit.
+- [x] Write H-A01 initial application, H-A02 width600→800 and grain edit preparing revision7→8 with stable logical part IDs; metadata and geometry move together; unrelated sentinel and probe dictionary unchanged.
+- [x] Write H-A03 failures after first solid, before/after old-root removal and during source write: verified abort restores original source/tree exactly, value=nil and mutation_state=rolled_back.
+- [x] Write H-A04 reentrant apply and document change after begin: reject/abort without publishing new lease; candidate replay remains rejected.
+- [x] Write H-A05 commit false/exception, abort failure and post-commit observer mutation: mutation_state=unknown, quarantine retained, no automatic undo/repair.
+- [x] Write H-A06 nonempty→empty→nonempty: no empty Group dependency, stable project ID/revisions, new root UUID after an empty state. H-A07 capped visits during staging attempts one abort; if remaining capacity cannot verify restoration, return unknown/quarantine with E_RESOURCE_LIMIT cause. No counter reset or unconditional rolled_back assertion.
+- [x] Missing-controller assertion was RED before implementation. Main-thread/guard/CAS, single-use candidate and synthetic rollback protocol implemented; focused/full dual-runtime suites passed. See [controller validation](application-validation.md).
 
 ## Task5 — experimental native port and controlled harness
 
@@ -108,4 +108,4 @@ Files: maintain qualification evidence outside Git; create original analysis in 
 
 ## Plan audit and current status
 
-Tasks1–2 are pure source/projection contracts;3–4 prove session/controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–3 are implemented and standalone tested. Tasks4–6 remain pending; this does not qualify native atomic application.
+Tasks1–2 are pure source/projection contracts;3–4 prove session/controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–4 are implemented and standalone/synthetic tested. Tasks5–6 remain pending; this does not qualify native atomic application.
