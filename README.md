@@ -61,3 +61,7 @@ The [Phase 2C carcass core](docs/phase-02c/README.md) now resolves explicit fini
 [Physical Checkpoint](docs/phase-02h/physical-checkpoint.md) provides a canonical source-only JSON persistence format with verification hashes and an explicit numeric policy/backend. Decode rebuilds parts and rejects inconsistent bindings; it does not import cached geometry. This pure codec does not write files or SketchUp model dictionaries and does not mark a revision accepted.
 
 [Native draft checkpoint storage/reopen](docs/phase-02h/native-checkpoint-validation.md) passed in a probe-only dictionary in SketchUp2021/Ruby2.7.1. The saved SKP restored identical source bytes and the same rebuilt four-part revision8 snapshot. Production accepted geometry/persistence transactions remain future work.
+
+## Atomic host application: design stage
+
+The [atomic host contract](docs/phase-02i/atomic-host-contract.md) and [six-task implementation plan](docs/phase-02i/atomic-host-implementation-plan.md) define one experimental source/geometry transaction, strict entity ownership, shared model leases, stale/ABA rejection and explicit rollback/indeterminate recovery. Task1 implements only pure, exact world projection and same-resolution checkpoint reuse; see [validation](docs/phase-02i/projection-validation.md). The native adapter remains a design proposal. The first mutation profile is restricted to controlled scratch models because transaction observers cannot establish general foreign-operation quiescence. The next unit is the closed host-document codec; no loader/RBZ is provided.
