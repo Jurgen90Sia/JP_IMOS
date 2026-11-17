@@ -32,34 +32,38 @@ module JPImosPro
       end
       def prepare_revision(current:,replacement:,expected_revision:,numeric_policy:,limits: {})
         boundary(limits) do |budget|
-          before,_=PhysicalRecord.validate(current,budget,'/current')
-          begin
-            ProjectCore::Revision.check_current(before['design']['project'],expected_revision)
-          rescue ProjectCore::Fault => e
-            path=e.json_pointer.start_with?('/current') ? '/current/design/project'+e.json_pointer.delete_prefix('/current') : e.json_pointer
-            raise ProjectCore::Fault.new(e.code,path,e.entity_ref,e.details,e.engine)
-          end
-          after,_,positions=PhysicalRecord.validate(replacement,budget,'/replacement')
-          begin
-            ProjectCore::Revision.check_replacement(before['design']['project'],after['design']['project'],budget)
-          rescue ProjectCore::Fault => e
-            path=e.json_pointer.sub(%r{\A/(current|replacement)}) { |prefix| prefix+'/design/project' }
-            raise ProjectCore::Fault.new(e.code,path,e.entity_ref,e.details,e.engine)
-          end
-          PhysicalRecord.check_transition(before,after,budget,positions)
-          raise ProjectCore::Fault.new('E_NO_CHANGE','/replacement') if ProjectCore::Revision.semantic_equal?(before,after,budget)
-          policy=ProjectCore.validated_policy(numeric_policy,budget)
-          revision=before['design']['project']['revision']+1
-          project=after['design']['project'].merge('revision'=>revision).freeze
-          design=after['design'].merge('project'=>project).freeze
-          state=after.merge('design'=>design).freeze
-          index=after['catalog']['entries'].each_with_object({}) do |entry,h|
-            budget.tick('/replacement/catalog');h[[entry['id'],entry['version']]]=entry
-          end
-          _,report=PhysicalRecord.scoped('/replacement/design') { Materials::Catalog.resolve_owned(design,index,budget) }
-          snapshot=PhysicalRecord.scoped('/replacement') { PhysicalSnapshot.build(state,report,policy,budget) }
-          {'project_id'=>project['project_id'],'base_revision'=>revision-1,'next_revision'=>revision,'state'=>state,'snapshot'=>snapshot}.freeze
+          prepare_revision_with_budget(current:current,replacement:replacement,expected_revision:expected_revision,
+            numeric_policy:numeric_policy,budget:budget)
         end
+      end
+      def prepare_revision_with_budget(current:,replacement:,expected_revision:,numeric_policy:,budget:)
+        before,_=PhysicalRecord.validate(current,budget,'/current')
+        begin
+          ProjectCore::Revision.check_current(before['design']['project'],expected_revision)
+        rescue ProjectCore::Fault => e
+          path=e.json_pointer.start_with?('/current') ? '/current/design/project'+e.json_pointer.delete_prefix('/current') : e.json_pointer
+          raise ProjectCore::Fault.new(e.code,path,e.entity_ref,e.details,e.engine)
+        end
+        after,_,positions=PhysicalRecord.validate(replacement,budget,'/replacement')
+        begin
+          ProjectCore::Revision.check_replacement(before['design']['project'],after['design']['project'],budget)
+        rescue ProjectCore::Fault => e
+          path=e.json_pointer.sub(%r{\A/(current|replacement)}) { |prefix| prefix+'/design/project' }
+          raise ProjectCore::Fault.new(e.code,path,e.entity_ref,e.details,e.engine)
+        end
+        PhysicalRecord.check_transition(before,after,budget,positions)
+        raise ProjectCore::Fault.new('E_NO_CHANGE','/replacement') if ProjectCore::Revision.semantic_equal?(before,after,budget)
+        policy=ProjectCore.validated_policy(numeric_policy,budget)
+        revision=before['design']['project']['revision']+1
+        project=after['design']['project'].merge('revision'=>revision).freeze
+        design=after['design'].merge('project'=>project).freeze
+        state=after.merge('design'=>design).freeze
+        index=after['catalog']['entries'].each_with_object({}) do |entry,h|
+          budget.tick('/replacement/catalog');h[[entry['id'],entry['version']]]=entry
+        end
+        _,report=PhysicalRecord.scoped('/replacement/design') { Materials::Catalog.resolve_owned(design,index,budget) }
+        snapshot=PhysicalRecord.scoped('/replacement') { PhysicalSnapshot.build(state,report,policy,budget) }
+        {'project_id'=>project['project_id'],'base_revision'=>revision-1,'next_revision'=>revision,'state'=>state,'snapshot'=>snapshot}.freeze
       end
     end
   end
