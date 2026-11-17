@@ -1,6 +1,6 @@
 # Atomic host application implementation plan
 
-> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Task1 is implemented with standalone validation; Tasks2–6 remain planned and unqualified.
+> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–2 are implemented with standalone validation; Tasks3–6 remain planned and unqualified.
 
 **Goal:** apply one declared unbanded rectangular project and its source in one controlled native operation, then prove rollback/undo/reopen consistency.
 
@@ -49,10 +49,10 @@ Files: create `lib/jp_imos_pro/host/document_codec.rb`, `test/host/document_code
 
 Interfaces: `Host::DocumentCodec.encode(state:, root_id:, acceptance_id:, manifest:, numeric_policy:, limits:{}) -> Result<String>` rebuilds source via Task1 and checks manifest shape/coverage. `decode(source:, numeric_policy:, limits:{}) -> Result<DecodedDocument>` rebuilds source/plan but does **not** accept native geometry or mint a lease. Trusted internal `encode_owned(projection:, root_id:, acceptance_id:, manifest:, budget:) -> String` reuses private Task1 output during a native operation. `decode_with_budget(source:, numeric_policy:, budget:)` is the shared internal read path. Extract `PhysicalCheckpoint.rebuild_owned_record(record:, numeric_policy:, budget:)` from its existing decoder, preserving all format/checksum/rebuild checks; DocumentCodec passes only its bounded parsed checkpoint object. Reuse Task1's owned-resolution projection helper after this one rebuild; do not nest public boundaries or reset counters.
 
-- [ ] Write H-D01..H-D07 first: closed schema, checksum repair with stale plan/source refused; duplicate/missing part/component rejected; PID string2^64-1 accepted without float conversion, leading-zero/overflow/JSON-number hints refused; unknown profile; empty document root_id=null/manifest empty; nonempty root_id UUID; source/checkpoint backend mismatch.
-- [ ] Run `ruby test/host/document_codec_test.rb`; Expected: missing module fails.
-- [ ] Implement the experimental document exactly as spec§3. Host IDs remain hints; this pure codec makes no native-ownership claim.
-- [ ] Run focused and complete suites on Ruby2.7.8/3.2.9, verify deterministic canonical output and resource refusal. Commit.
+- [x] Write H-D01..H-D07: closed schema, checksum repair with stale plan/source refused; duplicate/missing part/component rejected; PID string2^64-1 accepted without float conversion, leading-zero/overflow/JSON-number hints refused; unknown profile; empty document root_id=null/manifest empty; nonempty root_id UUID; source/checkpoint backend mismatch.
+- [x] Run `ruby test/host/document_codec_test.rb`; missing entry-point assertion failed before implementation.
+- [x] Implement the experimental document exactly as spec§3. Host IDs remain hints; this pure codec makes no native-ownership claim.
+- [x] Run focused and complete suites on Ruby2.7.8/3.2.9, verify deterministic canonical output and resource refusal. See [validation](document-codec-validation.md).
 
 ## Task3 — shared authority, read leases and explicit recovery
 
@@ -108,4 +108,4 @@ Files: maintain qualification evidence outside Git; create original analysis in 
 
 ## Plan audit and current status
 
-Tasks1–2 are pure source/projection contracts;3–4 prove controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Task1 alone is implemented and standalone tested. Tasks2–6 remain pending; this does not qualify native atomic application.
+Tasks1–2 are pure source/projection contracts;3–4 prove controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–2 are implemented and standalone tested. Tasks3–6 remain pending; this does not qualify native atomic application.
