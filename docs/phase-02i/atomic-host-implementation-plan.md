@@ -1,6 +1,6 @@
 # Atomic host application implementation plan
 
-> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–4 are implemented with standalone/synthetic validation; Tasks5–6 remain planned and unqualified.
+> For agentic workers: use superpowers:executing-plans task-by-task under the user's standing execution authorization; independent branch review before integration. Tasks1–5 are implemented with standalone/synthetic/SDK-double validation; actual native Task6 remains pending and unqualified.
 
 **Goal:** apply one declared unbanded rectangular project and its source in one controlled native operation, then prove rollback/undo/reopen consistency.
 
@@ -90,10 +90,10 @@ Files: create `lib/jp_imos_pro/host/native_port.rb`, `test/host/native_support.r
 
 Interfaces: Port from Tasks3–4. NativePort creation requires an opaque registry-issued ControlledContext registered by the harness for an exact newly saved workspace scratch copy and current Model incarnation. Unknown/generic model dispatch returns E_HOST_QUIESCENCE_UNPROVEN. The controller/harness supplies an explicit idle assertion; observers cannot manufacture one. This is a cooperative scratch-environment condition, not a solution for arbitrary foreign operations or a security barrier against arbitrary Ruby execution.
 
-- [ ] Add port contract tests for denied unregistered paths/models, missing grant, edit path, locked root, global orphan scan cap and cyclic container traversal. Expected: RED until guards exist.
-- [ ] Implement only Group-based geometry from exact world vertices, mm→inches once, strict topology/normal/coverage inspection, experimental attributes and PID hints. Use supported SDK methods only; no silent active_path switching or transparent operations.
-- [ ] Add observer registration/lifecycle invalidation and gateway before-action invalidation. No observer performs native writes. Document the opaque native-anchor binding and how open/close revokes an incarnation.
-- [ ] Full standalone suites must pass, but report native cases NOT RUN until Task6. Commit.
+- [x] Add port contract tests for denied unregistered paths/models, missing grant, edit path, locked root, global orphan scan cap and cyclic container traversal. Missing-entry and individual guard regressions were RED before fixes.
+- [x] Implement only Group-based geometry from exact world vertices, mm→inches once, strict topology/normal/coverage inspection, experimental attributes and PID hints. Use supported SDK methods only; no silent active_path switching or transparent operations.
+- [x] Add observer registration/lifecycle invalidation and gateway before-action invalidation. No observer performs native writes. Document the opaque native-anchor binding and how open/close revokes an incarnation.
+- [x] Full standalone suites passed on Ruby2.7/3.2; SDK-double checks and review recorded in [adapter validation](native-adapter-validation.md). Actual native cases remain NOT RUN until Task6.
 
 ## Task6 — actual SketchUp qualification and release gate
 
@@ -108,4 +108,4 @@ Files: maintain qualification evidence outside Git; create original analysis in 
 
 ## Plan audit and current status
 
-Tasks1–2 are pure source/projection contracts;3–4 prove session/controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–4 are implemented and standalone/synthetic tested. Tasks5–6 remain pending; this does not qualify native atomic application.
+Tasks1–2 are pure source/projection contracts;3–4 prove session/controller behavior;5–6 are the conditional native boundary. All spec sections and five review-focus risks map to explicit tests above. Tasks1–5 are implemented with standalone/synthetic/SDK-double tests. Actual native Task6 remains pending; this does not qualify native atomic application.
