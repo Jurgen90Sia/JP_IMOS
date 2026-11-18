@@ -17,6 +17,7 @@ module JPImosPro
         authority=Registry.context_authority(context);port=context.port
         ticket=authority.begin_read(context,grant)
         policy=ProjectCore::Document.new(budget).deep_freeze(ProjectCore.validated_policy(numeric_policy,budget))
+        check_port_policy(port,policy)
         raise ProjectCore::Fault.new('E_HOST_EDIT_CONTEXT','/host/edit_path') if authority.port_call { port.edit_path_open? }
         raw=authority.port_call { port.document_json }
         unless raw.nil? || raw.instance_of?(String)
@@ -44,6 +45,11 @@ module JPImosPro
         end
         inspection=own_inspection(inspection,document,projection,budget)
         authority.publish_lease(context,ticket,raw,document,projection,inspection,policy,recovery)
+      end
+      def check_port_policy(port,policy)
+        if port.respond_to?(:numeric_policy) && port.numeric_policy!=policy
+          raise ProjectCore::Fault.new('E_NUMERIC_POLICY_CONFLICT','/numeric_policy')
+        end
       end
       def own_inspection(inspection,document,projection,budget)
         if document.nil?

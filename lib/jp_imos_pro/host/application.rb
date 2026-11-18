@@ -45,6 +45,7 @@ module JPImosPro
         authority.validate_lease(base,mutation:true)
         authority.check_idle_context(context)
         port=context.port
+        Reader.check_port_policy(port,base.policy)
         fault('E_HOST_EDIT_CONTEXT','/host/edit_path') if port_call { port.edit_path_open? }
         raw=port_call { port.document_json }
         unless (raw.nil? || raw.instance_of?(String)) && raw==expected_raw

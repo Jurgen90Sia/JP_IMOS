@@ -33,12 +33,12 @@ module JPImosPro
       private_class_method :new
     end
     class VisitBudget
-      attr_reader :used
-      def initialize(limit)
+      attr_reader :used,:core_budget
+      def initialize(limit,core_budget=nil)
         unless limit.instance_of?(Integer) && limit>0 && limit<=50_000
           raise ProjectCore::Fault.new('E_INPUT_CONTRACT','/limits/entity_visits')
         end
-        @limit,@used=limit,0
+        @limit,@used,@core_budget=limit,0,core_budget
       end
       def tick(count=1)
         unless count.instance_of?(Integer) && count>0
@@ -52,6 +52,7 @@ module JPImosPro
     class Authority
       include Opaque
       attr_reader :anchor,:epoch,:sequence
+      def busy?;@busy;end
       def initialize(anchor)
         @anchor=anchor
         @contexts={}.compare_by_identity
@@ -248,8 +249,10 @@ module JPImosPro
         unless limits.instance_of?(Hash)
           raise ProjectCore::Fault.new('E_INPUT_CONTRACT','/limits')
         end
-        visits=VisitBudget.new(limits.fetch(:entity_visits,50_000))
-        result=ProjectCore.boundary(limits.reject { |key,_| key==:entity_visits }) { |budget| yield budget,visits }
+        result=ProjectCore.boundary(limits.reject { |key,_| key==:entity_visits }) do |budget|
+          visits=VisitBudget.new(limits.fetch(:entity_visits,50_000),budget)
+          yield budget,visits
+        end
         result[:metadata]={schema:'jpimos.host-session/1',profile_version:Projection::PROFILE,mutation_state:'unchanged'}
         result
       rescue ProjectCore::Fault => e
